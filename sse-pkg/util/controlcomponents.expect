@@ -1,0 +1,1675 @@
+#!/usr/bin/env expect
+################################################################################
+#
+# File:    controlcomponents.expect
+# Project: OpenSonATA
+# Authors: The OpenSonATA code is the result of many programmers
+#          over many years
+#
+# Copyright 2011 The SETI Institute
+#
+# OpenSonATA is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+# 
+# OpenSonATA is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with OpenSonATA.  If not, see<http://www.gnu.org/licenses/>.
+# 
+# Implementers of this code are requested to include the caption
+# "Licensed through SETI" with a link to setiQuest.org.
+# 
+# For alternate licensing arrangements, please contact
+# The SETI Institute at www.seti.org or setiquest.org. 
+#
+################################################################################
+
+# -*-tcl-*-   (set Emacs editing mode)
+# use expect instead of straight tcl in order to 
+# get signal handling
+
+# Command-line interpreter that starts & kills components that
+# connect to the sse-pkg 'seeker' program.
+# Component output either goes to an xterm (if requested)
+# or to a log file shared across all components.
+# Communications to and from the seeker are via ASCII messages on
+# a tcp socket.  
+
+# Allowed environment variable overrides:
+# Ifc host:
+#   CONTROL_COMPONENTS_IFCx_HOST
+# Tscope control host:
+#   CONTROL_COMPONENTS_TSCOPE_HOST
+# ATA Antenna controller server host:
+#   CONTROL_COMPONENTS_ANT_CONTROL_HOST
+# DxArchiver host:
+#   CONTROL_COMPONENTS_DX_ARCHx_HOST
+# PPS host:
+#   CONTROL_COMPONENTS_PPSx_HOST
+
+# Default to local host for AntControlServer to make
+# it easy to attach to the ATA simulator.  Use of real server
+# will require an override as listed above.
+#
+set defaultAntControlServer_ "localhost"
+
+# 'base port' for connecting to antenna controllers on the ATA ant server.
+set defaultAntControlBasePort_ 1083
+
+# 'base port' for dx connections to dxArchivers
+set defaultDxToDxArchiverBasePort_ 8857
+
+# Define information used to connect to the seeker and 
+# to identify this controller:
+set ssePort_ 8866
+set name_ "control1"
+set interfaceVersion_ "1.0"
+
+# Rename the 'real' exit so it can be intercepted
+# before it's executed.
+rename exit _exit
+
+# Define the output channel.  Default is stdout for interactive
+# use, but gets overridden to a socket if acting as a tcp client
+set outchan_ stdout
+
+# Create a global list of started components.
+# Each component process is started with a pipe channel.
+# Each list element is a {component name, pipeChannelId} pair.
+set startedComponents_ {}
+set deliberatelyKilledComponents_ {}
+
+set knownDxNames_ { }
+
+set simulatorMode_ 0
+set cmdlineMode_ 0
+set useXterm_ 0
+set runUnitTests_ 0
+set labMode_ 0
+set tscopeSimMode_ 0
+set autoRestart_ 0
+
+# TBD check for env override of SSE_ARCHIVE dir
+set tempLogDir_ "$env(HOME)/sonata_archive/templogs"
+set logFilename_ "${tempLogDir_}/controlcomponents-log.txt"
+
+# get the "setup" dir for config files
+set sseSetupDir_ [ exec "printSseSetupDir" ]
+
+
+# Parse command line args
+
+set initialComponentsToStartList_ ""
+
+proc usage { args } {
+    puts "Prelude component controller:"
+    puts "usage: controlcomponents \[-sim\] \[-cmdline\] \[-xterm\] \[-lab\] \[-tscopesim\] \[-unittest\] \[<component> ... \]"
+    puts "  -sim: run in simulator mode"
+    puts "  -cmdline: take input from the command line rather than the seeker"
+    puts "  -xterm: start each component in its own xterm"
+    puts "  -lab: start in lab mode (affects tsig & tscope configuration)"
+    puts "  -tscopesim: start telescope in simulator mode"
+    puts "  -unittest: run unit tests"
+    puts "  -autorestart: automatically restart components that disconnect unexpectedly"
+    puts "  <component>: start the given components"
+}
+
+puts "controlcomponents args: $argv"
+
+foreach arg $argv {
+
+    #puts "arg is $arg"
+
+    switch -glob -- $arg {
+	"-sim"  {
+	    set simulatorMode_ 1
+	} "-cmdline" {
+	    set cmdlineMode_ 1
+	} "-unittest" { 
+	    set runUnitTests_ 1
+	} "-xterm" { 
+	    set useXterm_ 1
+	} "-lab" { 
+	    set labMode_ 1
+	} "-tscopesim" { 
+	    set tscopeSimMode_ 1
+	} "-autorestart" { 
+	    set autoRestart_ 1
+	} "-*" {
+	    puts "unknown option $arg";
+	    usage
+	    _exit 1
+	} default { 
+
+	    # component to start
+	    lappend initialComponentsToStartList_ $arg
+	}
+    }
+}
+
+# prepare log file 
+set logChanId_ [open $logFilename_ w+]
+
+
+# return current time as YYYY-MM-DD HH:mm:ss
+proc isoDateTime {} {
+    return [clock format [clock seconds] -format "%G-%m-%d %H:%M:%S UTC" -gmt true]
+}
+
+
+# TimeQueue:: defines an array of queues, indexed by component name.
+# Each queue has a max length, and stores the last N times
+# at which the component was started.  When a new start
+# time is added to the end of the queue, the time at the front of 
+# queue (ie, the earliest time) is dropped.
+# This is used to determine the time intervals between the startup attempts
+# for a particular component, so that we know to give up if there are 
+# too many too quickly.
+
+namespace eval ::TimeQueue {
+
+}
+
+# Define array of time queues, indexed by component name.
+# Each queue is maxQueueLength long,
+# and contains up to that many start times of components
+
+set TimeQueue::timeArray("") {}
+set TimeQueue::maxQueueLength 5
+set TimeQueue::epochTime 0
+
+# Add the start time to the end of this component's queue.
+# Drop the earliest time from the front of the queue.
+proc TimeQueue::queueAdd { componentName startTime } {
+	
+	#puts "queueAdd: componentName is $componentName"
+	#puts "startTime is $startTime"
+
+	# create the queue
+	if { ! [ info exists TimeQueue::timeArray($componentName) ] } {
+		set TimeQueue::timeArray($componentName) {}
+
+                # pre-fill the queue with the epoch time
+                for { set i $TimeQueue::maxQueueLength } {$i} {incr i -1} {
+                        lappend TimeQueue::timeArray($componentName) $TimeQueue::epochTime
+                }
+	}
+
+	lappend TimeQueue::timeArray($componentName) $startTime
+
+	# drop the earliest item from the front of the queue
+	set TimeQueue::timeArray($componentName) \
+		[ lreplace $TimeQueue::timeArray($componentName) 0 0 ]
+}
+
+proc TimeQueue::queuePrint { componentName } {
+	# puts "maxQueueLength is $TimeQueue::maxQueueLength"	
+	puts "queuePrint: $componentName: $TimeQueue::timeArray($componentName)"
+}
+
+proc TimeQueue::printArray { } {
+
+	foreach key [ array names TimeQueue::timeArray ] {
+		puts "$key: $TimeQueue::timeArray($key)"
+	}
+}
+
+proc TimeQueue::getEarliestTime { componentName } {
+
+	# default is start of the epoch
+	set earliest $TimeQueue::epochTime
+
+	if [ info exists TimeQueue::timeArray($componentName) ] {
+		# get front of the queue
+		set earliest [lindex $TimeQueue::timeArray($componentName) 0]
+	}
+
+	return $earliest
+}
+
+
+proc prepareSshCommand { args } {
+
+    # Use strict host key checking 
+    # and turn off password authentication so that
+    # no ssh prompt is issued if host key is missing,
+    # which can hang this scripts input handler.
+    # Ssh will respond with "Host key verification failed."
+    # or 'permission denied'.
+
+    # -n redirect stdin from /dev/null
+    # use -t twice to force pseudo-tty allocation
+
+    return "ssh -oStrictHostKeyChecking=yes -oPasswordAuthentication=no -n -t -t"
+}
+
+proc startComponent { name cmd } {
+
+    global useXterm_
+
+    set wrapperCmd "$cmd"
+
+    if {$useXterm_} {
+
+	# Each xterm spawns a shell, and each executed
+	# program is followed by a shell, so that 
+	# the xterm sticks around until killed.
+	# That way the windows remain up for
+	# debugging purposes in case any of the programs
+	# exit prematurely.
+
+	set nScrollLines 1000
+	
+	set wrapperCmd "xterm -iconic -sb -sl $nScrollLines  -geometry 79x6+6+351 -title ${name} -e sh -c \"'$cmd'; sh\" "
+
+    }
+
+    runStartComponentCmd $name $wrapperCmd
+
+}
+
+
+proc runStartComponentCmd { name cmd } {
+
+    puts "runStartComponentCmd: name: $name"
+    puts "cmd: $cmd"
+    
+    global startedComponents_
+
+    if [ catch { set pipeChanId [open "|$cmd 2>@stdout"] } catchError ] {
+	sendError $catchError
+	return
+    } 
+    
+    # set the output of the command to nonblocking so that this
+    # script never hangs waiting for input
+    fconfigure $pipeChanId -blocking false
+    fileevent $pipeChanId readable [list Reader $pipeChanId]
+    
+
+    # add this component to the started list
+    set nameAndChanId "$name $pipeChanId"
+    lappend startedComponents_  $nameAndChanId
+
+    # remember the time this component was started
+    TimeQueue::queueAdd $name [clock seconds]
+
+}
+
+# send the message terminator to the output channel,
+# and flush it
+
+proc sendMsgTerm { args }  {
+    set msgTerminator "<end>"
+
+    global outchan_
+    puts $outchan_ $msgTerminator
+    flush $outchan_
+}
+
+# print the 'intrinsic' information about this controller
+proc intrinsics { args } {
+    global outchan_
+    global name_
+    global interfaceVersion_
+
+    puts $outchan_ "Intrinsics:"
+    puts $outchan_ "InterfaceVersion: $interfaceVersion_"
+    puts $outchan_ "Name: $name_"
+
+}
+
+# show all the known dxs
+proc known { args } {
+
+   global outchan_
+   global knownDxNames_ 
+   puts $outchan_ "known dxs:  $knownDxNames_"
+
+}
+
+
+# show the known stl2 dxs
+proc stl2 { args } {
+   global outchan_
+   global stl2DxNames_
+   puts $outchan_ "known stl2 dxs:  $stl2DxNames_"
+}
+
+# show the known xeon dxs
+proc xeon { args } {
+   global outchan_
+   global xeonDxNames_
+   puts $outchan_ "known xeon dxs:  $xeonDxNames_"
+}
+
+
+proc help { args } {
+
+  global outchan_
+
+  puts $outchan_ "Control (start/kill) component software."
+  puts $outchan_ "Commands:"
+  puts $outchan_ "known"
+  puts $outchan_ "   - show list of all known dx names"
+  puts $outchan_ "stl2"
+  puts $outchan_ "   - show list of known stl2 dx names (will use hardware dadd)"
+  puts $outchan_ "xeon"
+  puts $outchan_ "   - show list of known xeon dx names"
+  puts $outchan_ "start <name> \[<name> ...\] "
+  puts $outchan_ "   - start the named components."
+  puts $outchan_ "   - Names can be any of: dxX tsigX ifcX tscopeX archiverX ppsX"
+  puts $outchan_ "     where X is the component number (eg, dx39, ifc2)"
+  puts $outchan_ "   - dxs on the known stl2 list will use hardware dadd"
+  puts $outchan_ "kill <name='all'> <name> \[<name> ...\]"
+  puts $outchan_ "   - kill all components started or the specific ones named"
+  puts $outchan_ "status"
+  puts $outchan_ "   - show started components"
+  puts $outchan_ "quit"
+  puts $outchan_ "   - quit this program"
+  puts $outchan_ "exit"
+  puts $outchan_ "   - alias for quit"
+
+}
+
+# check if the named component has already been started.
+# returns '1' or '0'
+proc componentAlreadyInStartedList { nameToSearchFor } {
+
+    set found 0
+
+    global startedComponents_
+
+    foreach componentInfo $startedComponents_ {
+
+	set name [ lindex $componentInfo 0 ]
+
+	if { $nameToSearchFor == $name  } {
+	    # puts "found name $name"
+
+	    set found 1
+	}
+    }
+
+    return $found
+}
+
+
+proc getComponentNameForChanId { chanIdToFind } {
+
+    global startedComponents_
+    set returnName "unknown"
+
+    foreach componentInfo $startedComponents_ {
+
+	set name [ lindex $componentInfo 0 ]
+	set chanId [ lindex $componentInfo 1 ]
+
+	if { $chanIdToFind == $chanId } {
+	    # puts "found componentname $name"
+	    
+	    set returnName $name
+	    break
+	}
+    }
+
+    return $returnName
+}
+
+
+proc getNamesOfAllStartedComponents { args } {
+
+    global startedComponents_
+
+    set nameList ""
+
+    foreach componentInfo $startedComponents_ {
+	
+	set name [ lindex $componentInfo 0 ]
+	
+	lappend nameList $name
+    }
+
+    return $nameList
+}
+
+proc processDisconnectedComponent { componentName } {
+
+    global autoRestart_
+    global deliberatelyKilledComponents_
+
+    # see if the component is on the deliberately killed list.
+    # if it is, then don't try to auto-restart it.
+
+    set index [ lsearch -exact $deliberatelyKilledComponents_ $componentName ]
+    if { $index == -1 } {
+	if { $autoRestart_ } {
+
+	    # check if the component has been started too many times
+	    # in too short a period.  If so, then send an error instead
+	    # of restarting it.
+
+	    set currentTime [clock seconds]
+	    set earliestTime [TimeQueue::getEarliestTime $componentName]
+	    set maxRestartIntervalSecs 60
+	    if { [ expr { $currentTime - $earliestTime } ] < $maxRestartIntervalSecs } {
+		sendError "$componentName restarted too many times in too short an interval, giving up"
+	    } else {
+		start $componentName
+	    }
+       }
+    } else {
+	# remove element from killed list
+	set deliberatelyKilledComponents_ [ lreplace $deliberatelyKilledComponents_ $index $index ]
+    }
+}
+
+# List for output on pipe channel, sending it to the log file.
+# If get an EOF (i.e., the process died),
+# then clean up that channel, and remove that component from
+# the list.
+proc Reader { pipeChanId } {
+
+    global logChanId_
+
+    #puts "Reader: chanId=$pipeChanId"
+
+    set name [ getComponentNameForChanId $pipeChanId ]
+
+    if [eof $pipeChanId] {
+
+	#puts "caught eof for pipe $pipeChanId"
+	if [catch {close $pipeChanId}] {
+	    #puts "error: failed to close $pipeChanId"
+	} 
+
+	removeComponentByChanId $pipeChanId
+
+	processDisconnectedComponent $name
+
+        return
+    }
+
+    # must try to read in order to trigger EOF
+    gets $pipeChanId line
+
+    if { ! [ fblocked $pipeChanId ] } {
+
+	# copy the line to the log
+	puts $logChanId_ "[isoDateTime] $name: $line"
+	flush $logChanId_
+	
+	checkForErrors $name $line
+    }
+}
+
+# Look for known possible errors in the line
+# for component with the given name. 
+# If found, report them to the SSE.
+
+proc checkForErrors { name line } {
+
+    set errorPatternList { 
+	"*error*" \ ;# generic 
+	"*host*not known*" \  ;# from ssh
+	"*Unknown host*" \  ;# from ssh
+	"*Connection timed out*" \ ;# from ssh
+	"*Command not found*" \ 
+	"*authenticity of host*can't be established*" \ ;# ssh
+	"*no address associated with hostname*" \ ;# ssh
+	"*host key verification failed*" \ ;# ssh
+	"*no route to host*" \ ;# ssh
+	"*usage*" \ ;# for bad arguments to programs
+	"*permission denied*" \ ;# from ssh, possibly others
+	"*Segmentation fault*" \ ;# generic 
+    }
+
+    # "errors" to be ignored
+    set ignorePatternList {
+	"*baselineErrorLimits*" \
+    }
+
+    set lowercaseLine [ string tolower $line ]
+
+    foreach errorPattern $errorPatternList {
+
+	# check for any errors, forward them to the sse
+	if { [string match [string tolower ${errorPattern}] \
+		$lowercaseLine] } {
+
+	    foreach ignorePattern $ignorePatternList {
+		if { ! [string match [ string tolower $ignorePattern ] \
+			$lowercaseLine]} {
+		sendError "$name $line"
+		break     
+		}
+	    }
+	    break
+	}
+   }
+
+}
+
+
+proc reset { args } {
+    # action TBD
+    # placeholder for seeker command
+}
+
+# prepare a start command for the tsig (test signal generator control)
+# with the given name
+proc prepareTsigStartCmd { name } {
+    
+    global outchan_
+    global sseSetupDir_
+    global simulatorMode_
+    global labMode_
+
+    puts $outchan_ "start $name"
+
+    set configFilename ""
+
+    if { $simulatorMode_ } {
+	set configFilename "simulator_$name.cfg"
+    } else {
+	if { $labMode_ } {
+	    set configFilename "${name}_lab.cfg"
+	} else {
+	    set configFilename "${name}_field.cfg"
+	}
+    }
+    puts "config filename is $configFilename"
+    set cmd "testsig -verbose -cfg $sseSetupDir_/$configFilename"
+
+	startComponent $name $cmd
+
+}
+
+# prepare a start command for the ifc (IF controller)
+# with the given name
+proc prepareIfcStartCmd { name } {
+    
+    global outchan_
+    global sseSetupDir_
+    global simulatorMode_
+    global env
+
+    puts $outchan_ "start $name"
+
+    set configFilename ""
+    set cmdPrefix ""
+    set seekerHost [exec hostname]
+
+    if { $simulatorMode_ } {
+
+	# run the simulator on the local host
+
+	set ifcSetupDir $sseSetupDir_
+	set configFilename "simulator_$name.cfg"
+
+    } else {
+
+	# Determine remote host name.
+	# Default is make the host name the same as the component name:
+	set ifcHost $name
+
+	# Allow env override of host name: 
+	# variable is "CONTROL_COMPONENTS_IFCx_HOST"
+
+	set envOverrideVar [ string toupper CONTROL_COMPONENTS_${name}_HOST ]
+	if [info exists env(${envOverrideVar})] {
+	    set ifcHost $env($envOverrideVar)
+	}
+
+	# Find out what the sse setup directory is set to on the ifc host.
+	# Use a command timeout so that this doesn't wait for a long time 
+	# if the host is not accessible.
+
+	set setupDirCmd "printSseSetupDir"
+	set ifcSetupDir [exec run-command-with-timeout ssh ${ifcHost} $setupDirCmd]
+	if { [string match  "*command timed out*" $ifcSetupDir ] } {
+	    sendError "timed out sending command $setupDirCmd to ifc: $name on host: $ifcHost"
+	    return ""
+	}
+
+	# Start the stx.  This shouldn't strictly be necessary,
+	# as the stx is supposed to be started on ifc boot,
+	# but do it here for insurance anyway.
+
+	set result [exec run-command-with-timeout startStx $ifcHost ]
+
+	# start the software on the ifc machine
+	set cmdPrefix "[prepareSshCommand] $ifcHost"
+	
+	set configFilename "${name}.cfg"
+
+    }
+    puts "config filename is $configFilename"
+
+    set cmd "$cmdPrefix ifc -verbose -host $seekerHost -cfg $ifcSetupDir/$configFilename"
+
+	startComponent $name $cmd
+
+}
+
+
+
+# Prepare a start command for the telescope controller
+# with the given name.
+
+proc prepareTscopeStartCmd { name } {
+    
+    global outchan_
+    global simulatorMode_
+    global useXterm_
+    global labMode_
+    global tscopeSimMode_
+    global env
+
+    puts $outchan_ "start $name"
+
+    # check if the program is to be interactive or not
+    set uiOpt ""
+    if { ! $useXterm_ } {
+	set uiOpt "-noui"
+    }
+
+    # Tscopes are simulated if in lab mode, or if explicitly requested
+
+    set simOpt ""
+    if { $labMode_ || $simulatorMode_ || $tscopeSimMode_ } {
+
+        # Turn on sim mode for the sse's tscope program.
+        # This doesn't prevent later connection to the real AntControl
+        # server (or its simulator) if the sim mode is turned off later.
+        set simOpt "-sim"
+    }
+
+    # Determine host on which to run sse tscope program
+    # (allowing env override)
+    set seekerHost [exec hostname]  ;# assume local host is seeker host
+    set tscopeHost $seekerHost
+    
+# toupper = to upper case
+    set envOverrideVar [ string toupper CONTROL_COMPONENTS_TSCOPE_HOST ]
+    if [info exists env(${envOverrideVar})] {
+        set tscopeHost $env($envOverrideVar)
+    }
+    
+    
+    # Allow env override of ATA ant control server: 
+    global defaultAntControlServer_
+	set antCntlServer $defaultAntControlServer_
+    
+    set envOverrideVar [ string toupper CONTROL_COMPONENTS_ANT_CONTROL_HOST ]
+    if [info exists env(${envOverrideVar})] {
+        set antCntlServer $env($envOverrideVar)
+    }
+        
+    # Figure out the control & monitor ports, based on the
+    # tscope number (pulled off the end of the name).
+    # Ports are assigned in sequential pairs, starting
+    # at the base port number.
+    # eg, for a base port of 1081, 
+    # tscope1 gets 1083,1084; 
+    
+    set scanResult [ scan $name "tscope%d" tscopeNumber ]
+    if { $scanResult <= 0 } {
+        sendError "tscope name '$name' is missing its trailing number, cannot start"
+        return ""
+    }
+    global defaultAntControlBasePort_
+    set controlPort [expr $defaultAntControlBasePort_ + (($tscopeNumber -1) * 2)]
+    set monitorPort [expr $controlPort + 1]
+    
+    
+    set cmd "tscope $uiOpt $simOpt -host $seekerHost -name $name -antserver $antCntlServer -controlport $controlPort -monitorport $monitorPort"
+    
+    # run locally or remotely as required
+    if { ! [string match $tscopeHost $seekerHost] } {
+        
+        # start the software on the remote machine
+        set prefix "[prepareSshCommand] $tscopeHost"	
+        
+        if { $useXterm_ } {
+            set cmd "$prefix '$cmd'"	
+        } else {
+            set cmd "$prefix sh -c '$cmd'"	
+        }
+    }
+
+	startComponent $name $cmd
+
+}
+
+# prepare a start command for the dx archiver
+# with the given name
+proc prepareDxArchiverStartCmd { name } {
+    
+    global outchan_
+    global useXterm_
+    global env
+
+    puts $outchan_ "start $name"
+
+    # extract the archiver number from the end of its name
+    set scanResult [ scan $name "arch%d" archiverNumber ]
+    if { $scanResult <= 0 } {
+	sendError "archiver name '$name' is missing its trailing number, cannot start"
+	return ""
+    }
+
+    # Determine remote host on which to run the archiver
+    # (allowing env override)
+    set seekerHost [exec hostname]  ;# assume local host is seeker host
+    set archiverHost $seekerHost
+
+    set envOverrideVar [ string toupper CONTROL_COMPONENTS_DX_ARCH${archiverNumber}_HOST ]
+    if [info exists env(${envOverrideVar})] {
+	set archiverHost $env($envOverrideVar)
+    }
+
+
+    # Figure out the dx connection port, based on the
+    # archiver number.
+    # Ports are assigned in sequentially, starting
+    # at the base port number.  Assumes first archiver number is 1.
+    # eg, for a base port of 8857, archiver2 gets port 8858
+
+    global defaultDxToDxArchiverBasePort_
+    set dxToDxArchiverPort [expr $defaultDxToDxArchiverBasePort_ + $archiverNumber -1]
+
+    # check if the program is to be interactive or not
+    set uiOpt ""
+    if { ! $useXterm_ } {
+	set uiOpt "-noui"
+    }
+
+    set cmd "dxArchiver $uiOpt -host $seekerHost -name $name -dx-port $dxToDxArchiverPort"
+
+    # run locally or remotely as required
+    if { ! [string match $archiverHost $seekerHost] } {
+
+	# start the software on the remote machine
+
+	set prefix "[prepareSshCommand] $archiverHost"
+
+	if { $useXterm_ } {
+
+	    set cmd "$prefix '$cmd'"	
+	} else {
+
+	    # use an extra shell so that 
+	    # the job on the remote machine dies when killed
+	    # on this end.
+
+	    set cmd "$prefix sh -c '$cmd'"	
+	}
+    }
+
+	startComponent $name $cmd
+
+}
+
+# prepare a start command for the pps (time broadcast)
+# with the given name
+proc preparePpsStartCmd { name } {
+    
+    global outchan_
+    global useXterm_
+    global env
+
+    puts $outchan_ "start $name"
+
+    # Determine remote host on which to run the pps broadcast
+    # (allowing env override)
+    set seekerHost [exec hostname]  ;# assume local host is seeker host
+    set ppsHost $seekerHost
+
+    set envOverrideVar [ string toupper CONTROL_COMPONENTS_${name}_HOST ]
+    if [info exists env(${envOverrideVar})] {
+	set ppsHost $env($envOverrideVar)
+    }
+
+    # run locally or remotely as required
+    set cmdPrefix ""
+    if { ! [string match $ppsHost $seekerHost] } {
+
+	# start the software on the remote machine
+
+	set cmdPrefix "[prepareSshCommand] $ppsHost "	
+    }
+
+    # Figure out the broadcast address. It's the same as the
+    # first three fields of the IP address of the pps host, with 255 replacing 
+    # the last field.
+    # The 'host' program reply is of this format:
+    # "<host> has address w.x.y.z"
+
+    if [ catch  { set hostIpAddrString [ exec host $ppsHost ] } catchError ] {
+	sendError "exec 'host' failed: $catchError"
+	return ""
+    }
+
+    # grab just the last field (ip addr)
+    set scanResult [ scan $hostIpAddrString "%*s %*s %*s %s" ipAddr ]
+    if { $scanResult <= 0 } {
+	sendError "failed to find host IP address for host $ppsHost for pps broadcast" 
+	return ""
+    }
+    set trimmedIpAddr [ string trimright $ipAddr \[0123456789\] ]  ;# strip off last field
+    set ppsBroadcastAddr "${trimmedIpAddr}255"
+
+    set cmd "$cmdPrefix pps $ppsBroadcastAddr"
+
+	startComponent $name $cmd
+
+}
+
+
+# Prepare a start command for the dx with the given name.
+proc prepareDxStartCmd { dxName } {
+    
+    global outchan_
+    global useXterm_
+    global env
+    puts $outchan_ "starting $dxName"
+
+# Wait a second or two between starting dxs
+    exec sleep 2
+
+    set host [ exec hostname ]
+    # puts $outchan_ "hostname is $host"
+
+    set cmd ""
+
+# toupper = to upper case
+    set envOverrideVar [ string toupper RUNSSE_DX_HOSTS ]
+    if [info exists env(${envOverrideVar})] {
+        set knownDxHosts $env($envOverrideVar)
+    }
+    
+
+	# start the real dx
+	    
+	# find which host this dx will run on
+		set sfx "_DX_NAMES"
+
+        set found 0
+	foreach dxhost $knownDxHosts {
+		set hostDxNames [ format "%s%s" $dxhost $sfx ]
+    			set envOverrideVar1 [ string toupper "$hostDxNames" ]
+    			if [info exists env(${envOverrideVar1})] {
+        			set hostDxs $env($envOverrideVar1)
+    			}
+			foreach dxname $hostDxs {
+			   if { $dxname == $dxName } {
+				set found 1
+                                set dxHost $dxhost
+ 	set envOverrideVar1 [ string toupper "$dxhost" ]
+    		if [info exists env(${envOverrideVar1})] {
+       		set currentdxhost_ $env($envOverrideVar1)
+    		}
+				break
+				}
+			    }
+		  }
+if { $found == 0 } { puts " No match " }
+
+        set opts "_OPTS"
+	set hostDxOpts [ format "%s%s" $dxHost $opts ]
+    			set envOverrideVar1 [ string toupper "$hostDxOpts" ]
+    			if [info exists env(${envOverrideVar1})] {
+        			set DxOptions $env($envOverrideVar1)
+    			}
+	set dxCmd "cd ~/sonata_install/bin; sudo ./dx -H ${host} -Q ${dxName} ${DxOptions}"
+	# Assumes ssh is set up for remote login without password for
+	# the current user.
+	# Note the use of the "-t" flag with ssh, so that
+	# the remote process will terminate when killed on this end.
+
+	# when using xterm, need extra quotes around dxCmd to get the command
+	# to execute correctly
+	if { $useXterm_ } {
+	    set cmd "ssh -t -l [exec whoami] $currentdxhost_ '$dxCmd'"
+	} else {
+
+	    # use -t option twice to force use of pseudoterminal,
+	    # so that dx software starts correctly, and can be terminated
+	    # on the dx by killing the ssh process on the seeker host
+
+	    set cmd "[prepareSshCommand] -l [exec whoami] $currentdxhost_ $dxCmd"
+	}
+
+
+	startComponent $dxName $cmd
+
+}
+
+
+# Prepare a start command for a channelizer
+proc prepareChannelizerStartCmd { chanHost } {
+    
+    global outchan_
+    global useXterm_
+    global env
+    puts $outchan_ "starting $chanHost"
+
+
+    set host [ exec hostname ]
+
+    set cmd ""
+
+# toupper = to upper case
+# get the real host name
+    
+ 	set envOverrideVar1 [ string toupper "$chanHost" ]
+    		if [info exists env(${envOverrideVar1})] {
+       		set currentchanhost_ $env($envOverrideVar1)
+    		}
+puts $currentchanhost_
+	    
+# get the name of this channelizer
+	set sfx "_NAME"
+
+	set hostChanName [ format "%s%s" $chanHost $sfx ]
+    			set envOverrideVar1 [ string toupper "$hostChanName" ]
+    			if [info exists env(${envOverrideVar1})] {
+        			set chanName $env($envOverrideVar1)
+    			}
+# get general options for all channelizers
+
+	set genChanOpts "CHANOPTS"
+    			set envOverrideVar1 [ string toupper "$genChanOpts" ]
+    			if [info exists env(${envOverrideVar1})] {
+        			set options1 $env($envOverrideVar1)
+    			}
+# get specific options for this channelizer
+	set sfx "_OPTS"
+
+	set specChanOpts [ format "%s%s" $chanHost $sfx ]
+    			set envOverrideVar1 [ string toupper "$specChanOpts" ]
+    			if [info exists env(${envOverrideVar1})] {
+        			set options2 $env($envOverrideVar1)
+    			}
+	set chanCmd "cd ~/sonata_install/bin; sudo ./channelizer -H ${host} -Q ${chanName} ${options1} ${options2}"
+puts $chanCmd
+	# Assumes ssh is set up for remote login without password for
+	# the current user.
+	# Note the use of the "-t" flag with ssh, so that
+	# the remote process will terminate when killed on this end.
+
+	# when using xterm, need extra quotes around dxCmd to get the command
+	# to execute correctly
+	if { $useXterm_ } {
+	    set cmd "ssh -t -l [exec whoami] $currentchanhost_ '$chanCmd'"
+	} else {
+
+	    # use -t option twice to force use of pseudoterminal,
+	    # so that dx software starts correctly, and can be terminated
+	    # on the dx by killing the ssh process on the seeker host
+
+	    set cmd "[prepareSshCommand] -l [exec whoami] $currentchanhost_ $chanCmd"
+	}
+	startComponent $chanName $cmd
+
+}
+
+
+# Prepare a start command for the Channelier with the given name.
+proc prepareChannelizerRestartCmd { chanName } {
+    
+    global outchan_
+    global useXterm_
+    global env
+    puts $outchan_ "restarting $chanName"
+
+    set host [ exec hostname ]
+    # puts $outchan_ "hostname is $host"
+
+    set cmd ""
+
+# toupper = to upper case
+    set envOverrideVar [ string toupper RUNSSE_CHAN_HOSTS ]
+    if [info exists env(${envOverrideVar})] {
+        set knownChanHosts $env($envOverrideVar)
+    }
+    
+
+	# find which host this chan will run on
+		set sfx "_NAME"
+
+        set found 0
+	foreach chanhost $knownChanHosts {
+puts $chanhost
+		set hostChanNames [ format "%s%s" $chanhost $sfx ]
+    			set envOverrideVar1 [ string toupper "$hostChanNames" ]
+    			if [info exists env(${envOverrideVar1})] {
+        			set hostChans $env($envOverrideVar1)
+    			}
+puts $hostChans
+			foreach channame $hostChans {
+			   if { $channame == $chanName } {
+				set found 1
+     set chanHost $chanhost
+ 	set envOverrideVar1 [ string toupper "$chanhost" ]
+    		if [info exists env(${envOverrideVar1})] {
+       		set currentchanhost_ $env($envOverrideVar1)
+    		}
+				break
+				}
+			    }
+		  }
+      if { $found == 0 } { 
+	puts " No match " 
+        } else {
+
+# get general options for all channelizers
+
+	set genChanOpts "CHANOPTS"
+    			set envOverrideVar1 [ string toupper "$genChanOpts" ]
+    			if [info exists env(${envOverrideVar1})] {
+        			set options1 $env($envOverrideVar1)
+    			}
+# get specific options for this channelizer
+	set sfx "_OPTS"
+
+	set specChanOpts [ format "%s%s" $chanHost $sfx ]
+puts $specChanOpts
+    			set envOverrideVar1 [ string toupper "$specChanOpts" ]
+    			if [info exists env(${envOverrideVar1})] {
+        			set options2 $env($envOverrideVar1)
+    			}
+puts $options2
+	set chanCmd "cd ~/sonata_install/bin; sudo ./channelizer -H ${host} -Q ${chanName} ${options1} ${options2}"
+puts $chanCmd
+	# Assumes ssh is set up for remote login without password for
+	# the current user.
+	# Note the use of the "-t" flag with ssh, so that
+	# the remote process will terminate when killed on this end.
+
+	# when using xterm, need extra quotes around dxCmd to get the command
+	# to execute correctly
+	if { $useXterm_ } {
+	    set cmd "ssh -t -l [exec whoami] $currentchanhost_ '$chanCmd'"
+	} else {
+
+	    # use -t option twice to force use of pseudoterminal,
+	    # so that dx software starts correctly, and can be terminated
+	    # on the dx by killing the ssh process on the seeker host
+
+	    set cmd "[prepareSshCommand] -l [exec whoami] $currentchanhost_ $chanCmd"
+	}
+	startComponent $chanName $cmd
+
+}
+}
+
+# Prepare a start command for all the dxs assigned to the dxhost
+proc prepareDxHostStartCmd { dxHost } {
+    
+    global outchan_
+    global useXterm_
+    global env
+    puts $outchan_ "starting $dxHost"
+
+
+    set host [ exec hostname ]
+
+    set cmd ""
+
+# toupper = to upper case
+    
+ 	set envOverrideVar1 [ string toupper "$dxHost" ]
+    		if [info exists env(${envOverrideVar1})] {
+       		set currentdxhost_ $env($envOverrideVar1)
+    		}
+puts $currentdxhost_
+	# start the real dx
+	    
+	# find which host this dx will run on
+	set sfx "_DX_NAMES"
+
+        set found 0
+	set hostDxNames [ format "%s%s" $dxHost $sfx ]
+    			set envOverrideVar1 [ string toupper "$hostDxNames" ]
+    			if [info exists env(${envOverrideVar1})] {
+        			set hostDxs $env($envOverrideVar1)
+    			}
+        set opts "_OPTS"
+	set hostDxOpts [ format "%s%s" $dxHost $opts ]
+    			set envOverrideVar1 [ string toupper "$hostDxOpts" ]
+    			if [info exists env(${envOverrideVar1})] {
+        			set DxOptions $env($envOverrideVar1)
+    			}
+	foreach dxname $hostDxs {
+# Wait a second or two between starting dxs
+    exec sleep 1
+
+# For testing on segin, setting dx to X polarization only
+
+	set dxCmd "cd ~/sonata_install/bin; sudo ./dx -H ${host} -Q ${dxname} ${DxOptions}"
+	# Assumes ssh is set up for remote login without password for
+	# the current user.
+	# Note the use of the "-t" flag with ssh, so that
+	# the remote process will terminate when killed on this end.
+
+	# when using xterm, need extra quotes around dxCmd to get the command
+	# to execute correctly
+	if { $useXterm_ } {
+	    set cmd "ssh -t -l [exec whoami] $currentdxhost_ '$dxCmd'"
+	} else {
+
+	    # use -t option twice to force use of pseudoterminal,
+	    # so that dx software starts correctly, and can be terminated
+	    # on the dx by killing the ssh process on the seeker host
+
+	    set cmd "[prepareSshCommand] -l [exec whoami] $currentdxhost_ $dxCmd"
+	}
+	startComponent $dxname $cmd
+
+    	}
+
+}
+
+proc sendError { errorText } {
+    global outchan_
+    puts $outchan_ "Error: $errorText"
+    sendMsgTerm
+
+}
+
+proc sendWarning { warningText } {
+    global outchan_
+    puts $outchan_ "Warning: $warningText"
+    sendMsgTerm
+
+}
+
+
+# start components. args is a list of 
+# component names
+
+proc start { args } {
+
+    global outchan_
+
+    #puts $outchan_ "you ran the start command with args $args"
+
+    if { $args == ""} {
+
+	sendError "Must specify the names of components to start"
+	return
+    }
+
+    # start each component, based on its name
+    foreach name $args {
+
+	# make sure it wasn't already started
+	if { [componentAlreadyInStartedList $name ] } {
+	    sendWarning "component $name has already been started, issuing restart"
+            restart $name
+	    continue
+	}
+
+	set cmd ""
+
+	switch -glob $name {
+
+	    "dxhost*" { set cmd [prepareDxHostStartCmd $name] }
+
+	    "dx*" { set cmd [prepareDxStartCmd $name] }
+
+	    "chanhost*" { set cmd [prepareChannelizerStartCmd $name] }
+
+	    "chan*" { set cmd [prepareChannelizerRestartCmd $name] }
+
+	    "tsig*" { set cmd [prepareTsigStartCmd $name] }
+
+	    "ifc*" { set cmd [prepareIfcStartCmd $name] }
+
+	    "tscope*" { set cmd [prepareTscopeStartCmd $name] }
+
+	    "arch*" { set cmd [prepareDxArchiverStartCmd $name] }
+
+	    default { sendError "don't know how to start component with this type of name: $name "
+	           continue;
+	    }
+
+	}
+#	startComponent $name $cmd
+
+    }
+
+    status
+
+}
+
+# kill the named component (which may be "all").
+# Look up its name in the startedComponents_
+# list.  If found, kill its associated pid,
+# else report an error.
+# Note: the associated component information gets
+# deleted by the removeComponentByChanId procedure 
+# which is invoked when the process exits.
+
+proc killComponent { killComponentName } {
+
+    global outchan_
+    #puts $outchan_ "running killComponent $killComponentName"
+
+    global startedComponents_
+    global deliberatelyKilledComponents_
+
+    set listIndex -1
+    set found 0
+
+    # Walk through the startedComponents_ list,
+    # killing all the jobs that match the request.
+
+    foreach componentInfo ${startedComponents_} {
+
+	set listIndex [ expr $listIndex + 1 ]
+	# puts $outchan_ "listIndex = $listIndex"
+
+	set componentName [ lindex $componentInfo 0 ]
+	set pipeChanId [ lindex $componentInfo 1 ]
+	set procId [pid $pipeChanId]
+
+	# puts $outchan_ "componentInfo:  $componentInfo"
+	# puts $outchan_ "componentName:  $componentName  procId: $procId"
+
+	if { $killComponentName == $componentName || $killComponentName == "all" } {
+	    #puts $outchan_ "found componentName $componentName"
+
+	    set found 1
+	    
+	    #puts $outchan_ "killing $componentName (procId: $procId)"
+	    
+	    # Try to kill the process.
+	    # Catch kill failure so this script doesn't exit if the
+	    # pid can't be found.  The process might have been killed
+	    # outside of our control.
+
+	    if [ catch {set result [exec kill -9 $procId]} ] {
+		sendError "warning: couldn't kill component $componentName (process $procId)"
+	    }
+
+	    # remember which ones have been killed deliberately,
+	    # so that they do not get restarted automatically
+	    
+	    lappend deliberatelyKilledComponents_ $componentName
+
+	} 
+    }
+
+    # give feedback if not found
+    if { ! $found } {
+	if { $killComponentName == "all" } {
+	    sendError "kill: no components found"
+	} else {
+	    sendError "kill: $killComponentName not found"
+	}
+    }
+
+}
+
+
+# Remove the component associated with the channel id.
+# Look up the channel id in the startedComponents_
+# list.  If found, delete it from the list,
+# else generate an error.
+
+proc removeComponentByChanId { channelIdToRemove } {
+
+    global outchan_
+    #puts $outchan_ "removeComponentByChanId $channelIdToRemove"
+
+    global startedComponents_
+
+    set listIndex -1
+    set found 0
+
+    # Walk through the startedComponents_ list,
+    # removing the entry that matches the request.
+    # Save all the entries not removed on the notRemovedList
+    # so that it can be used to update the startedComponents_
+    # list  (ie, effectively deleting the removed components
+    # from the original list.  using lreplace to do this
+    # directly on the startedComponents_ seems to confuse 
+    # the tcl interpreter, causing indexing errors).
+
+    set notRemovedList {}
+
+    foreach componentInfo ${startedComponents_} {
+
+	set listIndex [ expr $listIndex + 1 ]
+	# puts $outchan_ "listIndex = $listIndex"
+
+	set componentName [ lindex $componentInfo 0 ]
+	set pipeChanId [ lindex $componentInfo 1 ]
+
+	#puts $outchan_ "componentInfo:  $componentInfo"
+
+	if { $channelIdToRemove == $pipeChanId } {
+	    #puts $outchan_ "found componentName $componentName"
+
+	    set found 1
+
+	    #puts $outchan_ "removing $componentName (chanId: $pipeChanId)"
+	    
+	} else {
+	    
+	    # not requested to be removed, so put it on the notRemovedList
+	    lappend notRemovedList  $componentInfo
+
+	}
+
+    }
+
+    # put the remaining (not removed) components back on the started list
+    # (effectively deleting all the removed ones from the original list)
+
+    set startedComponents_ $notRemovedList
+
+    # give feedback if not found
+    if { ! $found } {
+	sendError "channelId $channelIdToRemove not found"
+    }
+
+    status
+
+}
+
+# kill one or more running components.
+# args is either 'all' or a list of component names.
+proc kill { args } {
+
+    global outchan_
+
+    #puts $outchan_ "you ran the kill command with args: $args"
+
+    if { $args == ""} {
+
+	sendError "kill: Must specify 'all' or a list of components to kill"
+	return
+    }
+
+    foreach name $args {
+	killComponent $name
+    }
+
+    status
+
+}
+
+
+# kill & start one or more running components.
+# args is either 'all' or a list of component names.
+proc restart { args } {
+
+    global outchan_
+
+    if { $args == ""} {
+
+	sendError "restart: Must specify a list of components to restart"
+	return
+    }
+
+    set nameList $args
+    if { $args == "all" } {
+
+	set nameList [ getNamesOfAllStartedComponents ]
+
+    } 
+
+    foreach name $nameList {
+	kill $name
+    }
+
+    # Wait for components to disconnect before issuing new start.
+    # TBD: determine appropriate time interval 
+    set sleepTimeMs 2000
+    
+    foreach name $nameList {
+	after $sleepTimeMs start $name
+    }
+
+    status
+
+}
+
+# print the started components
+
+proc status { args } {
+
+    global outchan_
+
+    puts $outchan_ "Status:"
+    puts $outchan_ "======="
+
+    global simulatorMode_
+    if { $simulatorMode_ } {
+	    puts $outchan_ "<running in simulator mode>"
+    }
+
+    global startedComponents_
+
+    foreach componentInfo $startedComponents_ {
+
+	set name [ lindex $componentInfo 0 ]
+	set pipeChanId [ lindex $componentInfo 1 ]
+	set procId [pid $pipeChanId]
+	puts $outchan_ "$name (pid: $procId, chanId: $pipeChanId)"
+
+    }
+
+    sendMsgTerm
+
+}
+
+# override exit
+proc exit { args } {
+
+    global startedComponents_
+
+    # kill any remaining components
+    if { [llength $startedComponents_] != 0 } {
+	kill all
+    }
+
+    # call the real exit
+    _exit
+}
+
+proc quit { args } {
+   
+    exit
+}
+
+
+# socket communications procedures
+proc openSocket {host port} {
+
+    set channelId [socket $host $port]
+    fconfigure $channelId -buffering line
+    return $channelId
+}
+
+proc connectToSocket { host port } {
+     puts "openSocket $host $port"
+    if [catch {set sock [openSocket $host $port]} sockerr] {
+	puts "Error: sse/seeker connection refused."
+	exit -1
+    }
+
+    return $sock
+}
+
+# process input from sse on the chanId
+proc processSseInput { chanId } {
+
+    set verbose 1
+
+    if [eof $chanId] {
+	puts "processSseInput: caught eof for chan $chanId"
+	catch {close $chanId}
+
+	return
+    }
+
+    # must try to read in order to trigger EOF
+    # tbd catch error
+    gets $chanId line
+
+    # Process one line
+    puts "incoming command: $line"
+
+    # process command here
+    if [catch {set result [eval $line]} errmsg] {
+	if {$verbose == 1} {
+	    puts "Error: $errmsg"
+	}
+	set SSE_ERROR_MSG_HEADER "Error"
+	puts $chanId "$SSE_ERROR_MSG_HEADER: command '$line': $errmsg";
+	sendMsgTerm
+	
+    } else {
+	if {$verbose == 1} {
+	    puts "Result: $result"
+	}
+
+	puts $chanId $result
+	sendMsgTerm
+    }
+}
+
+proc startComponentsSpecifiedAsCmdArgs { args } {
+    global initialComponentsToStartList_ 
+
+    # if there are any archivers, start them first,
+    # then wait a few seconds to allow them time to
+    # get ready for dx connections
+    
+    set nonArchiversList {}
+    set foundArchivers 0
+    foreach name $initialComponentsToStartList_ {
+	if [ string match "arch*" $name ] {
+	    start $name
+	    set foundArchivers 1
+	} else {
+	    lappend nonArchiversList $name
+	}
+    }
+
+    if { $foundArchivers } {
+	set sleepTimeMs 5000
+	after $sleepTimeMs
+    }
+
+    foreach name $nonArchiversList {
+	start $name
+    }
+
+
+}
+
+proc talkToSse { host port } {
+
+    global outchan_
+
+    set sock [connectToSocket $host $port]
+
+    set outchan_ $sock
+
+    fileevent $sock readable [list processSseInput $sock]
+}
+
+
+proc unitTests { } {
+
+    if {[catch {package require tcltest}]} {
+	puts stderr "Skipping unit tests. tcltest package required."
+	return
+    }
+
+    # tcltest library is grabbing hold of argv so clear it out
+    # (otherwise it generates a 'missing value for option -x' error)
+
+    global argv
+    set argv ""
+
+    ::tcltest::test test-1.0 {component list} {
+	componentAlreadyInStartedList "componentNotThere"
+    } 0
+
+    ::tcltest::test test-1.1 {component list} {
+	getComponentNameForChanId "-999"
+    } "unknown"
+
+    ::tcltest::cleanupTests
+
+}
+
+if { $runUnitTests_ } {
+
+    unitTests
+    exit
+}
+
+# cleanup if ctrl-c is issued, or the script exits with an error
+trap quit {INT TERM QUIT ABRT ILL HUP }
+
+
+# act as a client to the sse
+if { ! $cmdlineMode_ } {
+    talkToSse localhost $ssePort_
+
+    startComponentsSpecifiedAsCmdArgs
+
+    vwait forever
+}
+
+startComponentsSpecifiedAsCmdArgs
+
+# Command loop:
+
+# Use a specific version (9.9.0) of tclreadline
+# which has been modified to disable signal handling in the
+# underlying GNU readline, to avoid conflicts with signal
+# handling done elsewhere.
+#
+# Also, an additional tclreadline::LoopOneLine routine
+# was added to tclreadlineSetup.tcl.  This is a variation
+# on the ::Loop routine that does not allow multiline input
+# (ie, no secondary input prompts), as a way to prevent
+# users from getting trapped in a tcl input mode.
+
+package require -exact tclreadline 9.9.0
+#package require tclreadline
+
+# alter the prompt
+namespace eval tclreadline {
+   proc prompt1 {} {
+       return "controlcomponents>> "
+   }
+}
+
+# trap ctrl-d (exit)
+::tclreadline::readline eofchar {
+puts "type 'exit' or 'quit' to end this program"
+}
+
+# process user input commands
+# (use the cmd line read loop that prevents secondary input prompts)
+tclreadline::LoopOneLine
+
+# standard loop:
+# tclreadline::Loop
+
+

@@ -1,0 +1,149 @@
+SonATA Versions.
+
+2/12/09 dx-1_00. Tagged for all of sonata-pkg.  First compilable/linkable
+	version of DX1.  Major changes from DX0 (sonata demo).  Not runnable,
+	has many known bugs and some functionality disabled, but usable for
+	testing front end.
+2/12/09 dx-1_01.  Tagged for dx only.  Result of initial testing, checkpoint
+	tag so that namespace changes can be made.
+2/12/09 channel-0_28.  Tagged for channelizer only.  Changed namespace from
+	sonata_channelizer to channelizer with eclipse refactoring facility.
+2/12/09 dx-1_02. Tagged for dx only.  Changed namespace from sonata_dx to dx.
+
+2/13/09 spectra-0_17.  Tagged for spectraLib only.  Changed namespace from
+	spectra_lib to spectra.
+2/13/09 sonata-0_01.  Tagged for all sonata-pkg.  Namespace changes.
+2/13/09 sonataLib-0_07.  Tagged for sonataLib only.  Changed typedef
+	complex* to	Complex*.
+2/13/09 channel-0_29.  Tagged for channelizer only.  Changed typedef
+	complex* to	Complex*.
+2/13/09 dx-1_03.  Tagged for dx only.  Changed typedef complex* to Complex*.
+2/13/09 packetgen-1_25.  Tagged for packetgen only.  Changed typedef
+	complex* to	Complex*.
+2/13/09 sonata-0_02.  Tagged for all sonata-pkg.  Changed typedef
+    complex* to Complex* using eclipse refactor.
+
+2/21/09 sonata-0_03.  Tagged for all sonata-pkg.  Changed namespace
+	dx_lib to dx.  Front end of dx (packet handling, spectrometry)
+	is mostly working.  Added filters directory and a number of
+	new filters.
+2/24/09 dx-1_04.  Tagged for dx only.  Rearranged Activity, Channel and
+	State so that function organization makes more sense.  Added Hz or
+	MHz to bandwidth functions, Usable to subchannel/bin functions.
+3/3/09 daddLib-0_01.  Tagged for daddLib only.  Initial version, appears
+	to work.  Provides only top-down DADD.
+3/4/09 spectra-0_18.  Tagged for spectraLib only.  Added timing code and
+	print operators for structures.
+3/4/09 dfb-0_20.  Tagged for dfbLib only.  Added print operators.
+3/4/09 channelizer-0_30.  Tagged for channelizer only.  Added print operators,
+	version number.
+3/4/09 daddLib-0_02.  Tagged for daddLib only.  Added timing code and
+	print operators.
+3/6/09 dx-1_05.  Tagged for dx only.  Major changes to CwTask to allow
+	DADD detections using daddLib.  Still needs work on use of callbacks
+	to do clustering and bad band reporting.  Found that bin values are
+	slightly high, probably due to discard of subchannel edge bins which
+	have lower average power than center bins.  ADDED A FUDGE FACTOR
+	(1.06) TO BASELINE CODE IN SPECTROMETER.CPP.  WE NEED TO FIGURE OUT
+	HOW TO CALCULATE THE FACTOR FROM THE FILTER.
+3/7/09 dadd-0_03.  Tagged for daddLib only.  Added report base classes
+	to allow callers to do their own hit and bad band reporting.
+3/7/09 daddLib-0_04.  Tagged for daddLib only.  ReportHit and ReportBadBand
+	put in namespace dadd.  Eliminated multiple polarizations, so
+	DaddBand array is no longer an array of pointers.  This means that
+	all reporting for a pol should be done before starting the next
+	pol.
+3/7/09 dx-1_06.  Tagged for dx only.  More changes to CwTask to modify
+	report and bad band handling.  Also some changes to PulseTask.  Both
+	appear to be more or less working, but need lots more testing.
+	Confirmation tasks are next.
+3/10/09 dx-1_07.  Tagged for dx only.  Added ArchiveChannel to lib;
+	creates a larger channel from multiple adjacent subchannels, taking
+	into account the overlap that went into making the subchannels.  Done
+	as part of work on confirmation.  [Will need to specify the stride
+	between subchannels, if they are not contiguous in memory.]  Added
+	test subdirectory and code to test ArchiveChannel.
+3/13/09 dx-1_08.  Tagged for dx only.  Continued working on ArchiveChannel,
+	adding dedrift, cleaning up test program and adding additional
+	tests.
+3/13/09 dx-1_09.  Tagged for dx only.  Added runtime arguments to test,
+	fixed a problem in ArchiveChannel.
+3/20/09 dfb-0_21.  Tagged for dfbLib only.  Made -O3 the optimization
+	level.  Cleaned up wola in polyphase.cpp.  Added computeFilterFft
+	in test.
+3/20/09 channelizer-0_31.  Tagged for channelizer only.  Made -O3 the
+	optimization level.
+3/20/09 daddLib-0_05.  Tagged for daddLib only.  Made -O3 the optimization
+	level.
+5/23/09 sonata-0_04.  Cleanup for eventual open-sourcing.  Implemented a
+	top-down build using ./reconfig followed by configure.  Added
+	--enable-debug flag to configure to use debug flags (-g -O0) instead
+	of release compiler flags (-O3).  Each sub-package (ATApackets,
+	daddLib, etc) can be configured separately for release or debug.  From
+	sonata-pkg:
+		make distclean
+		./reconfig
+		./configure [--enable-debug]
+		make leastsquares
+		make
+	Also revised directory structure for ATApackets and packetgen to more
+	closely align with standard directory structure.
+5/24/09 sonata-0_05.  Partial corrections made to compile without warnings
+	with -Wall.  Mostly consisted of cleanup of class initialization order
+	and casting of signed or unsigned iteration variables.  Still need to
+	deal with warnings caused by "if (err = test())"; can be handled with
+	an addition set of parentheses "if ((err = test()))" but this is a
+	little silly.  Channelizer and front end of dx appear to be working.
+	Also tested with all software (sse, packetgen, channelizer, dx) running
+	on a single machine, and it appears to be okay.
+6/2/09 gauss-0_02.  Initial tagged version of gaussian noise generator library.
+6/2/09 gauss-0_03.  New interface for gaussLib, simplifying user signal
+	interface.
+6/2/09 gauss-0_04.  Moved definitions of BasicSig, CwSig, PulseSig to
+	Signals.h, removed unused code and variables, added documentation.
+6/2/09 gauss-0_05.  Tagged for gaussLib only.  Changed float32_t variables
+	to float64_t.
+6/2/09 gauss-0_06.  Tagged for gaussLib only.  Added functions to return
+	version and I/F version; added version prints to test.
+6/2/09 sonata-0_06.  Tagged for all of sonata-pkg.  Added gaussLib noise
+	generation library, modified packetgen to use it.  dx/test must still
+	be modified to use it.  "Samples" must be removed from sonataLib.
+6/4/09 gauss-0_07.  Tagged for gaussLib only.  Corrected generation of
+	signals and changed interface.
+6/4/09 sonata-0_07.  Tagged for all of sonata-pkg.  Corrected gaussLib signal
+	generation, made changes to dx/ArchiveChannel to make it consistent with
+	gaussLib.  Made changes to dx/test dedrift testing code.
+6/10/09 sonataLib-0_09.  Tagged for sonataLib only.  Added microfloat
+	archive format (SmallTypes).
+6/29/09 sonata-0_08.  Tagged for all of sonata-pkg.  Removed autogen.sh;
+	use manual reconfig instead.  Added include directory just below
+	sonata-pkg; put cycle.h in it and modified Makefile.am's as
+	necessary.  Installation currently to sonata-pkg/sigproc_install; made
+	sure that no headers are installed.  Added header files to sources
+	for dx/src.  Tested "make dist", looks like it works.
+6/30/09 sonata-0_09.  Tagged for all of sonata-pkg.  Checked in all
+	changes to Makefile.am's.
+6/30/09 sonata-0_10.  Tagged for all of sonata-pkg.  Fixed include
+	directories to find cycle.h.
+7/2/09 sonata-0_11.  Continued cleanup of make and configuration
+	related files to enable correct execution of make and dist.
+7/11/09 packetrelay-0_02.  Tagged for packetrelay only.  Added write to
+	file to allow capturing of the data.
+
+OpenSonATA (git)
+10/23/09 sig-0.12.0 [master] Working version of DX which performs all
+	confirmation (CW and pulse, coherent, followup and secondary).  Also
+	handles start time synchronization for both channelizer and DX.
+	Archive channel is not correct: the response is not flat across the
+	channel.  I think the problem is understood and corrected in the
+	next version.
+10/24/09 sig-0.12.1 [devel] Corrected but hacked version of archive
+	channel, one which (I believe) produces the correct archive channel
+	with flat response across the channel.  The next version will
+	make major modifications to the code to eliminate the now-irrelevant
+	removal of oversampling, since the archive channel is now maintained
+	in oversampled form.
+10/26/09 sigdevel-0.12.2 [devel] Cleaned up the archive channel code for
+	the simplified, oversampled archive channel.  This version allows
+	baseline half frames to be zero.  Eliminated many compiler warning
+	messages.

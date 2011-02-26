@@ -1,0 +1,80 @@
+#!/bin/sh
+################################################################################
+#
+# File:    verifyHeaderInMakefile
+# Project: OpenSonATA
+# Authors: The OpenSonATA code is the result of many programmers
+#          over many years
+#
+# Copyright 2011 The SETI Institute
+#
+# OpenSonATA is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+# 
+# OpenSonATA is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with OpenSonATA.  If not, see<http://www.gnu.org/licenses/>.
+# 
+# Implementers of this code are requested to include the caption
+# "Licensed through SETI" with a link to setiQuest.org.
+# 
+# For alternate licensing arrangements, please contact
+# The SETI Institute at www.seti.org or setiquest.org. 
+#
+################################################################################
+
+
+# $Id: verifyHeaderInMakefile,v 1.1.1.1 2006/08/02 05:28:05 kes Exp $
+
+# For this dir & all subdirs, if a Makefile.am file exists,
+# list all the *.h files in the directory that are not found in
+# Makefile.am
+
+targetfile="Makefile.am"
+
+# get the directories to search
+dirlist=`find . -type d -print`
+
+# save the start dir so we can return to it each time
+startdir=`pwd`
+
+# process each dir
+for dir in $dirlist
+do
+   cd $dir
+
+   # see if the target file is present
+   if [ -r "$targetfile" ]
+   then
+
+      # get the .h files in this dir, ignoring the error 
+      # that's given if no files match the wildcard
+      headerlist=`ls *.h 2>/dev/null`
+
+      # if the headerlist is not empty,
+      # check each header to see if it's in the target file
+      if [ "$headerlist" != "" ]
+      then 
+
+         for headerfile in $headerlist
+         do
+            result=`grep $headerfile $targetfile`
+
+            if [ "$result" = "" ]
+            then
+	       echo "$dir/$headerfile not found in $targetfile"
+            fi 
+         done
+      fi
+   fi
+
+   # go back to the directory we started in
+   cd $startdir
+
+done

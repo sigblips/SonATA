@@ -1,0 +1,2 @@
+Main-Class: opensonata.dataDisplays.SeekerReports
+Class-Path: mysql-connector-java-2.0.14-bin.jar

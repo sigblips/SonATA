@@ -1,0 +1,23 @@
+# Least squares, 8 channels, 2 foldings, 25% overlap
+# Matlab: passband 1.00, stopband 1.666, 1 ripple, 40dB rejection, 16 coeff
+# NOTE: this is a toy filter intended for testing only.
+Length=8
+Foldings=2
+Overlap=.25
+# Coefficients
+ -6.4653024e-004
+  1.2063363e-002
+  3.2002933e-002
+  5.7800776e-002
+  8.6420894e-002
+  1.1366652e-001
+  1.3505018e-001
+  1.4681189e-001
+  1.4681189e-001
+  1.3505018e-001
+  1.1366652e-001
+  8.6420894e-002
+  5.7800776e-002
+  3.2002933e-002
+  1.2063363e-002
+ -6.4653024e-004

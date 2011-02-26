@@ -1,0 +1,115 @@
+#!/usr/bin/env expect
+################################################################################
+#
+# File:    unitTest.exp
+# Project: OpenSonATA
+# Authors: The OpenSonATA code is the result of many programmers
+#          over many years
+#
+# Copyright 2011 The SETI Institute
+#
+# OpenSonATA is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+# 
+# OpenSonATA is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with OpenSonATA.  If not, see<http://www.gnu.org/licenses/>.
+# 
+# Implementers of this code are requested to include the caption
+# "Licensed through SETI" with a link to setiQuest.org.
+# 
+# For alternate licensing arrangements, please contact
+# The SETI Institute at www.seti.org or setiquest.org. 
+#
+################################################################################
+
+
+# Original code created by L. R. McFarland 2003
+
+# expect script to test the ifc c++ object
+
+spawn ./ifc -cfg unitTest.cfg -cmdline
+
+# ---------------------------
+# ----- test intrinsics -----
+# ---------------------------
+
+send "ifc intrinsics\n"
+
+expect {
+    "name = ifc1" {
+	puts "Correct name."
+    }
+    timeout {
+	puts -nonewline "\nFailure Ifc test: "
+	puts "intrinsics name incorrect."
+	exit -1
+    }
+}
+
+expect {
+    "version = 4.1" {
+	puts "Correct version."
+    }
+    timeout {
+	puts -nonewline "\nFailure Ifc test: "
+	puts "intrinsics version incorrect."
+	exit -1
+    }
+}
+
+
+send "ifc attn 8 9\n"
+send "status\n"
+
+expect {
+    "Ifc Status = ifc1" {
+	puts "Correct name."
+    }
+    timeout {
+	puts -nonewline "\nFailure Ifc test: "
+	puts "status Ifc name incorrect."
+	exit -1
+    }
+}
+
+expect {
+    "Attn. Left (dB) = 8" {
+	puts "Correct attn left."
+    }
+    timeout {
+	puts -nonewline "\nFailure Ifc test: "
+	puts "status attn left incorrect."
+	exit -1
+    }
+}
+
+expect {
+    "Attn. Right (dB) = 9" {
+	puts "Correct attn right."
+    }
+    timeout {
+	puts -nonewline "\nFailure Ifc test: "
+	puts "status attn right incorrect."
+	exit -1
+    }
+}
+
+
+
+# TBD add stx testing
+
+
+
+puts "==============================="
+puts "Ifc test successfully complete."
+puts "==============================="
+
+exit 0
+

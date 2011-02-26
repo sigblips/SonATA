@@ -1,0 +1,48 @@
+#!/bin/sh
+################################################################################
+#
+# File:    verifyMakefileVariablesDefined
+# Project: OpenSonATA
+# Authors: The OpenSonATA code is the result of many programmers
+#          over many years
+#
+# Copyright 2011 The SETI Institute
+#
+# OpenSonATA is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+# 
+# OpenSonATA is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with OpenSonATA.  If not, see<http://www.gnu.org/licenses/>.
+# 
+# Implementers of this code are requested to include the caption
+# "Licensed through SETI" with a link to setiQuest.org.
+# 
+# For alternate licensing arrangements, please contact
+# The SETI Institute at www.seti.org or setiquest.org. 
+#
+################################################################################
+
+
+# List all the unexpected undefined make variables.
+
+# Do this by running make & ignoring all the "expected" undefined variables.
+# Also ignore the "leaving directory", "nothing to be done", and
+# "Making all in <dir>" lines to reduce the number of output lines.
+# This should leave the "entering directory" output lines so
+# the directories are listed in addition to the undefined variables.
+
+# Note: this assumes that gnu make is being run, 
+# for the  --warn-undefined-variables option.
+
+make --warn-undefined-variables 2>&1 | awk  "\$0 !~ /ACLOCAL_M4|LISP|TAGS_FILES|TAGS_DEPENDENCIES|TAGS_FILES|TEXINFOS|HEADERS|EXTRA_DIST|SOURCES|AM_MAKEFLAGS|CONFIG_STATUS_DEPENDENCIES|CONFIGURE_DEPENDENCIES|_DEPENDENCIES|AM_CPPFLAGS|AM_CXXFLAGS|AM_LDFLAGS|DEBUGFLAGS|Leaving|Nothing|Making all/"
+
+
+
+

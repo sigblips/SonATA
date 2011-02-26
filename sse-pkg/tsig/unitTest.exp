@@ -1,0 +1,185 @@
+#!/usr/bin/env expect
+################################################################################
+#
+# File:    unitTest.exp
+# Project: OpenSonATA
+# Authors: The OpenSonATA code is the result of many programmers
+#          over many years
+#
+# Copyright 2011 The SETI Institute
+#
+# OpenSonATA is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+# 
+# OpenSonATA is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with OpenSonATA.  If not, see<http://www.gnu.org/licenses/>.
+# 
+# Implementers of this code are requested to include the caption
+# "Licensed through SETI" with a link to setiQuest.org.
+# 
+# For alternate licensing arrangements, please contact
+# The SETI Institute at www.seti.org or setiquest.org. 
+#
+################################################################################
+
+# expect script to test the TestSig c++ object
+
+# Original code created by L. R. McFarland 2003
+
+spawn ./testsig -cfg ./unitTest.cfg -cmdline
+
+# ---------------------------
+# ----- test intrinsics -----
+# ---------------------------
+
+send "tsig intrinsics\n"
+
+expect {
+    "name = tsig1" {
+	puts "Correct name."
+    }
+    timeout {
+	puts -nonewline "\nFailure TestSig test: "
+	puts "intrinsics name incorrect."
+	exit -1
+    }
+}
+
+expect {
+    "version = 4.3" {
+	puts "Correct version."
+    }
+    timeout {
+	puts -nonewline "\nFailure TestSig test: "
+	puts "intrinsics version incorrect."
+	exit -1
+    }
+}
+
+# ---------------------
+# ----- test tune -----
+# ---------------------
+
+send "tsig on\n"
+send "tsig tunesiggen 0.800100 0.1 0.1 500.0\n"
+
+expect {
+    "TestSig Status = tsig1" {
+	puts "Correct name."
+    }
+    timeout {
+	puts -nonewline "\nFailure TestSig test: "
+	puts "status TestSig name incorrect."
+	exit -1
+    }
+}
+
+
+expect {
+    "Signal Sweep State = 1" {
+	puts "Correct sweep state."
+    }
+    timeout {
+	puts -nonewline "\nFailure TestSig test: "
+	puts "status sweep state incorrect."
+	exit -1
+    }
+}
+
+expect {
+    "Signal Amplitude (dBm) = 0.100000" {
+	puts "Correct signal amplitude."
+    }
+    timeout {
+	puts -nonewline "\nFailure TestSig test: "
+	puts "status signal amplitude incorrect."
+	exit -1
+    }
+}
+
+expect {
+    "Signal Start Frequency (MHz) = 0.800100" {
+	puts "Correct signal start frequency."
+    }
+    timeout {
+	puts -nonewline "\nFailure TestSig test: "
+	puts "status signal start frequency incorrect."
+	exit -1
+    }
+}
+
+expect {
+    "Signal Stop Frequency (MHz) = 0.800150" {
+	puts "Correct signal stop frequency."
+    }
+    timeout {
+	puts -nonewline "\nFailure TestSig test: "
+	puts "status signal stop frequency incorrect."
+	exit -1
+    }
+}
+
+expect {
+    "Signal Sweep Time (sec) = 500.000000" {
+	puts "Correct signal sweep time."
+    }
+    timeout {
+	puts -nonewline "\nFailure TestSig test: "
+	puts "status signal sweep time incorrect."
+	exit -1
+    }
+}
+
+expect {
+    "Signal Output = 1" {
+	puts "Correct signal output."
+    }
+    timeout {
+	puts -nonewline "\nFailure TestSig test: "
+	puts "status Signal Output incorrect."
+	exit -1
+    }
+}
+
+
+send "tsig pulse 1.2 20.0 2.0\n"
+send status()
+
+expect {
+    "Pulse Source = at33250" {
+	puts "Correct pulse source."
+    }
+    timeout {
+	puts -nonewline "\nFailure TestSig test: "
+	puts "pulse source incorrect."
+	exit -1
+    }
+}
+
+expect {
+    "Pulse Period (sec) = 20.000000" {
+	puts "Correct pulse period."
+    }
+    timeout {
+	puts -nonewline "\nFailure TestSig test: "
+	puts "status pulse period incorrect."
+	exit -1
+    }
+}
+
+
+
+
+puts "==================================="
+puts "TestSig test successfully complete."
+puts "==================================="
+
+exit 0
+

@@ -1,0 +1,64 @@
+1999-10-28  Kevin Dalley  <kevin@seti.org>
+
+	* samples/TestRunnerExample.cpp: use return from runner.run() as
+	exit status
+
+	* samples/TestTest.h: change division by zero to throw uncaught
+	exception. 
+
+	* samples/runtests: check return value of TestRunnerExample so
+	that runtests can be meaningfully run from Makefile
+
+	* test/textui/TestRunner.cpp: now uses getopt_long, added "--help"
+ 	option.
+
+	* test/textui/getopt.c, test/textui/getopt1.c,
+	test/textui/getopt.h: aded GNU's getopt function which is used by
+	TestRunner class
+
+	* test/textui/Makefile.am: add GNU's getopt to library
+
+	* configure.in: use config.h file
+
+	* samples/ExampleTestCase.cpp, samples/ExampleTestCase.h: comment
+	out division by zero test, which doesn't work on some platforms.
+	Add testThrowUnexpectedException to produce an error
+
+	* test/textui/TestRunner.h, test/textui/TestRunner.cpp,
+ 	test/textui/Makefile.am, samples/TestRunner.cpp,
+ 	samples/TestRunnerExample.cpp: samples/Makefile.am,
+ 	samples/testrun: moved from samples back to test/textui, minus
+ 	main.  Added TestRunnerExample which contains main from
+ 	TestRunner.cpp
+
+1999-10-26  Kevin Dalley  <kevin@seti.org>
+
+	* test/framework/TestCase.h: remove ^M at the end of define lines
+
+	* test/framework/CppUnitException.h: include <exception>
+
+	* samples/TestRunner.cpp, samples/TestRunner.mak: moved from
+	test/textui directory
+
+	* test/textui/TestRunner.cpp, test/textui/TestRunner.mak: removed, 
+	moved to samples directory
+
+	* test/textui/TextTestResult.cpp: changed printErrors and
+	printFailures to match standard compiler-style warning statements
+	so that error statements can be automatically parsed
+
+	* samples/Multicaster/MulticasterTest.cpp, samples/TestTest.h,
+ 	samples/ExampleTestCase.cpp: changed assert to cu_assert and
+ 	changed calling sequence for addTest calls
+
+	* test/framework/TestCase.h, test/framework/TestCase.h,
+ 	test/framework/CppUnit.h: added header files
+
+1999-10-25  Kevin Dalley  <kevin@seti.org>
+
+	* samples/ExampleTestCase.cpp, samples/TestTest.h,
+ 	samples/Multicaster/MulticasterTest.cpp: changed assert to
+ 	cu_assert, changed calling sequence for addTest calls
+
+	* doc/cookbook.htm: corrected typo
+

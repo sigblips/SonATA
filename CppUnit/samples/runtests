@@ -1,0 +1,23 @@
+#! /bin/sh
+# We expect 5 failures + errors
+./TestRunnerExample --all
+if [ $? -ne 5 ]; then
+    exit 1
+fi
+
+# We expect 5 failures + errors
+./TestRunnerExample ExampleTestCase
+if [ $? -ne 5 ]; then
+    exit 1
+fi
+
+# We expect 0 failures + errors
+./TestRunnerExample MulticasterTest
+if [ $? -ne 0 ]; then
+    exit 1
+fi
+
+
+# We expect 0 failures + errors
+./TestRunnerExample TestTest
+exit $?

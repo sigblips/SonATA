@@ -1,0 +1,244 @@
+################################################################################
+#
+# File:    README
+# Project: OpenSonATA
+# Authors: The OpenSonATA code is the result of many programmers
+#          over many years
+#
+# Copyright 2011 The SETI Institute
+#
+# OpenSonATA is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+# 
+# OpenSonATA is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with OpenSonATA.  If not, see<http://www.gnu.org/licenses/>.
+# 
+# Implementers of this code are requested to include the caption
+# "Licensed through SETI" with a link to setiQuest.org.
+# 
+# For alternate licensing arrangements, please contact
+# The SETI Institute at www.seti.org or setiquest.org. 
+#
+################################################################################
+
+
+This is the SETI Institute's SSE (Search System Executive)
+package, for controlling the NSS (New Search System).
+
+Package dependencies 
+(The package is known to build with the specified versions):
+=====================
+gcc 3.3, 4.1.1, 4.3.2
+automake 1.8.4 
+autoconf 2.59
+libtool 1.5.6 
+m4 1.4
+ACE 5.3, 5.5.1, 5.6.1, 5.7.1
+java 1.4.2, 1.5.0
+tcl 8.3, 8.4, 8.5
+mysql 3.23.55, 4.0.20, 4.1.7, 4.1.10, 5.0.22
+swig 1.3.21, 1.3.31
+expect 5.26 
+gnu readline (2.2, 5.2)  -- needed for tclreadline
+xtail
+
+The following libraries are available from the SETI Inst source code server:
+---------------------------------------------------------------------------
+tclreadline 9.9.0 (use for command line editing in the seeker, see below)
+National Instruments GPIB ENET library (only needed for GPIB device control)
+
+Optional packages:
+-----------------
+CppUnit 1.5 (unit testing) - available from SETI source code server
+doxygen 1.2.10 (creating automated documentation)
+stlport 4.6.2 (debugging STL related problems)
+pp3, tex, ImageMagick (for making starmaps)
+Apache Tomcat 5.0.28 (for web control/monitor interface)
+
+
+ACE installation
+----------------
+
+Distilled from the ACE_wrappers/ACE-INSTALL.html file
+section: "Using the Traditional ACE/GNU Configuration"
+
+1. Get the ace installation and unpack to a local directory,
+   e.g. ${HOME}/ace
+
+   It should unpack an "ACE_wrappers" subdirectory.
+
+
+2. set the ACE_ROOT env var:
+
+   setenv ACE_ROOT ${HOME}/ace/ACE_wrappers
+
+
+3. create a "config.h" link to an appropriate config file
+
+   cd $ACE_ROOT/ace
+   ln -s config-linux.h config.h
+
+4. create a "platform_macros.GNU" link to an appropriate file
+
+   cd $ACE_ROOT/include/makeinclude
+   ln -s platform_linux.GNU platform_macros.GNU
+
+5. Only build the subset of ace needed:
+
+   cd $ACE_ROOT/ace
+   make
+
+6. Once the build completes, copy everything from
+   $ACE_ROOT to /usr/local/ACE_Wrappers
+
+7. Add the ACE library to your LD_LIBRARY_PATH,
+e.g.,
+
+   setenv ACE_ROOT /usr/local/ACE_wrappers
+   setenv LD_LIBRARY_PATH "$ACE_ROOT/ace:$ACE_ROOT/lib:$LD_LIBRARY_PATH"
+
+
+CppUnit installation
+--------------------
+
+TBD
+
+sse-pkg build instructions:
+===========================
+% ./reconfig
+% make
+% make check (if the CppUnit library is installed)
+% make install
+
+The software installs in the ~/sse_install directory by default.
+
+
+Build variations:
+
+To make the pdm libraries only:
+% ./reconfig --enable-pdmlibsonly
+
+
+
+To run it:
+==========
+
+1. Install a version of the .sserc file in your home directory:
+
+% cp sse-pkg/util/example.sserc ~/.sserc
+
+Not that you may have to specify the location of the
+tclreadline shared library in order for the seeker's tcl
+interpreter to find it.  You can do this by uncommenting
+and modifying this line in your .sserc file:
+
+#lappend ::auto_path /usr/lib
+
+
+2. Use the 'runsse' script to start things up,
+e.g., to run in all-simulator mode type:
+
+% runsse -sim
+
+You can also use 'runsse -help' to see all
+the startup options.
+
+
+3. If you want to use the sse with the mysql database, here's
+how to set it up:
+
+% mysqladmin create sonata_test
+% mysql sonata_test < sse-pkg/database/seeker.schema
+
+4. There are several optional environment variables that can
+be used to override the default locations for various files:
+
+SSE_INITRC - seeker startup file.
+   Default: ~/.sserc
+
+SSE_SETUP - directory of config files. 
+   Default: ~/sse_install/setup
+
+SSE_ARCHIVE - directory root for created data files. 
+   Default: ~/sse_archive
+
+
+5. Other environment variables that can override program
+configuration defaults:
+
+SSE_DEBUG_LOG_MAX_FILESIZE_MEGABYTES 
+   Default: 25
+
+CONTROL_COMPONENTS_IFCx_HOST 
+   Default: same as component name, e.g. ifc1
+
+CONTROL_COMPONENTS_TSCOPE_HOST 
+   Default: seeker host
+
+CONTROL_COMPONENTS_ANT_CONTROL_HOST 
+   Default: antcntl.atarray.org
+
+CONTROL_COMPONENTS_PDM_ARCHx_HOST
+   Default: seeker host
+
+CONTROL_COMPONENTS_PPSx_HOST
+   Default: seeker host
+
+RUNSSE_FONT
+   Default: 9x15
+
+Notes:
+======
+
+1. tclreadline 9.9.0:
+
+This version of tclreadline (originally rev 2.1.0)
+was modified to disable signal handling in the
+underlying GNU readline, to avoid conflicts with signal
+handling done elsewhere.
+
+Also a tclreadline::LoopOneLine routine
+was added to tclreadlineSetup.tcl.  This is a variation
+on the ::Loop routine that does not allow multiline input
+(ie, no secondary input prompts), as a way to prevent
+users from getting trapped in a tcl input mode.
+
+
+2. The seeker software requires that the mysqld server run with a
+timezone of UTC.
+
+
+3.  /usr/include/features.h
+
+Some Linux builds seem to have a glibc bug in /usr/include/features.h.
+The error that is reported is:
+
+In file included from /usr/include/stdio.h:28,
+                 from argp-fmtstream.h:33,
+                 from argp-fs-xinl.c:28:
+/usr/include/features.h:280:70: error: operator '&&' has no right operand
+
+The referenced code from is /usr/include/features.h:
+
+if defined _FORTIFY_SOURCE && _FORTIFY_SOURCE > 0 \
+    && __GNUC_PREREQ (4, 1) && defined __OPTIMIZE__ && __OPTIMIZE__ > 0
+
+
+There doesn't seem to be an official bug report on this,
+but there are some related discussion here, which make it sound
+like a library bug:
+
+http://forums.gentoo.org/viewtopic.php?p=1706299
+
+One solution is to edit features.h file like so:
+
+#if defined _FORTIFY_SOURCE && _FORTIFY_SOURCE > 0 \
+    && __GNUC_PREREQ (4, 1) && (defined __OPTIMIZE__)
+

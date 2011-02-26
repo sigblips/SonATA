@@ -1,0 +1,99 @@
+$Id: Readme-tnk,v 1.5 2007/05/08 16:08:50 kilsdonk Exp $
+
+27 Feb 2002
+T. Kilsdonk
+
+This version of tclreadline (originally rev 2.1.0)
+has been modified to disable signal handling in the
+underlying GNU readline, to avoid conflicts with signal
+handling done elsewhere.
+
+This is done by setting the GNU readline rl_catch_signals
+global variable to zero:
+
+-------------------------------
+tclreadline.c:
+Tclreadline_Init()
+{
+...
+
+    /* T. Kilsdonk  27 Feb 2002.  
+       Turn off readline signal handlers.
+    */
+    rl_catch_signals = 0;
+
+}
+
+-------------------------------
+
+The version number was also changed to 9.9.0 so that it could
+be easily distinguished from other versions.
+
+This can be handled in two ways:
+
+1.  If you reconfigure the automake/autoconf, etc files
+before building, then the MAJOR & MINOR version number set in configure.in
+should get propagated automatically.
+
+To reconfigure:
+   ./reconfig
+
+2. If you're going to use the existing autoconf, etc files,
+then this change has to be made in these 2 files:
+
+configure:
+
+  MAJOR=9
+  MINOR=9
+  PATCHLEVEL=0
+
+config.h:
+  #define VERSION "9.9.0"
+
+
+--------------------------
+
+Finally, an additional tclreadline::LoopOneLine routine
+was added to tclreadlineSetup.tcl.  This is a variation
+on the ::Loop routine that does not allow multiline input
+(ie, no secondary input prompts), as a way to prevent
+users from getting trapped in a tcl input mode.
+
+--------------------------
+
+Build notes & possible problems:
+
+0. If you have any kind of automake or autoconf related problems, run
+
+   ./reconfig
+
+to reconstruct all the appropriate files.
+
+1. If you get this error during configuration, you'll need to do what it says:
+
+  checking where to look for tcl.h... configure: error:
+  Can't find tcl.h.  Use --with-tcl-includes to specify the directory
+  containing tcl.h on your system.
+
+e.g.,
+
+./configure --prefix=/home/kilsdonk/tmp/tclreadline/test-install --with-tcl-includes=/usr/local/include
+
+
+2. If you get this error when tclreadline is loaded into tcl:
+
+   "tcl load error: tputs symbol unresolved"
+
+you'll need to hand edit config.cache to set tputs to 'no' for libcurses 
+like so and rebuild:
+
+   ac_cv_lib_ncurses_tputs=${ac_cv_lib_ncurses_tputs='no'}
+
+
+3. On the Prelude sun machines, building against ncurses results in 
+this link error:
+
+  ld: fatal: relocations remain against allocatable but non-writable sections
+
+so ncurses was removed from the terminal library search list in
+configure.in.

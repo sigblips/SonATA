@@ -1,0 +1,2 @@
+Main-Class: opensonata.dataDisplays.STXHistogramDisplay
+Class-Path: plot.jar

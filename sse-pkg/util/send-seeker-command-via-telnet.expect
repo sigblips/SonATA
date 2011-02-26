@@ -1,0 +1,70 @@
+#!/usr/bin/env expect
+################################################################################
+#
+# File:    send-seeker-command-via-telnet.expect
+# Project: OpenSonATA
+# Authors: The OpenSonATA code is the result of many programmers
+#          over many years
+#
+# Copyright 2011 The SETI Institute
+#
+# OpenSonATA is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+# 
+# OpenSonATA is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with OpenSonATA.  If not, see<http://www.gnu.org/licenses/>.
+# 
+# Implementers of this code are requested to include the caption
+# "Licensed through SETI" with a link to setiQuest.org.
+# 
+# For alternate licensing arrangements, please contact
+# The SETI Institute at www.seti.org or setiquest.org. 
+#
+################################################################################
+
+# -*-tcl-*- (emacs mode)
+
+
+# send command to seeker on TCP port using telnet.
+# command is given as argv.
+# Command results go to stdout. 
+
+# wait a reasonable amount of time for the command to be processed
+# and any results to be returned before closing the connection. 
+
+set timeout 1
+
+if [catch "spawn -noecho telnet localhost 2555" reason ] {
+    send_user "failed to spawn telnet: $reason\n"
+    exit 1
+}
+
+# if there's an error, then report it.
+# otherwise strip out the telnet greeting text.
+log_user 0
+expect {
+    -re "Escape character.*\r\n" {}
+    -re "Connection refused" { send_user "telnet connection refused\n"}
+}
+log_user 1
+
+# send the seeker command, and let the results pass through
+# (turn the argv list into a string first so that multiword command 
+# arguments are interpreted properly)
+
+set cmd [join "$argv"]
+send "$cmd\n"
+
+# Use the 'expect' command to wait so that any command results 
+# get printed.
+# Ask for any unexpected string and just let it timeout.
+
+expect "AnythingAtAll"
+

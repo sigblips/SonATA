@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE taglib PUBLIC "-//Sun Microsystems, Inc.//DTD JSP Tag Library 1.2//EN" "http://java.sun.com/dtd/web-jsptaglibrary_1_2.dtd">
+
+<taglib>
+
+    <tlib-version>1.0.1</tlib-version>
+    <jsp-version>1.2</jsp-version>
+
+    <short-name>inf</short-name>
+    <uri>http://www.jstripe.com/tags</uri>
+    <description>jstripe.com tools tag library. Author Vlad Ilyushchenko.</description>
+
+    <tag>
+        <name>duration</name>
+        <tag-class>org.jstripe.tomcat.probe.tags.DurationTag</tag-class>
+        <body-content>JSP</body-content>
+
+        <description>
+            Converts value in milliseconds into human readable representation of seconds, minutes and hours
+        </description>
+
+        <attribute>
+            <name>value</name>
+            <required>true</required>
+            <rtexprvalue>true</rtexprvalue>
+        </attribute>
+    </tag>
+
+    <tag>
+        <name>volume</name>
+        <tag-class>org.jstripe.tomcat.probe.tags.VolumeTag</tag-class>
+        <body-content>JSP</body-content>
+
+        <description>
+            Displays volume of data in bytes, KBytes, MBytes, GBytes or TBytes depending on the value.
+        </description>
+
+        <attribute>
+            <name>value</name>
+            <required>true</required>
+            <rtexprvalue>true</rtexprvalue>
+        </attribute>
+
+        <attribute>
+            <name>fractions</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+        </attribute>
+    </tag>
+
+    <tag>
+        <name>toggle</name>
+        <tag-class>org.jstripe.tomcat.probe.tags.ParamToggleTag</tag-class>
+        <body-content>JSP</body-content>
+
+        <description>
+            Toggles the value of "size" request parameter
+        </description>
+
+        <attribute>
+            <name>param</name>
+            <required>true</required>
+            <rtexprvalue>true</rtexprvalue>
+        </attribute>
+    </tag>
+
+    <tag>
+        <name>out</name>
+        <tag-class>org.jstripe.tomcat.probe.tags.TruncatedOutTag</tag-class>
+        <body-content>JSP</body-content>
+
+        <description>
+            Outputs values up to maxLength adding elipse (...) where necessary
+        </description>
+
+        <attribute>
+            <name>value</name>
+            <required>true</required>
+            <rtexprvalue>true</rtexprvalue>
+        </attribute>
+
+        <attribute>
+            <name>maxLength</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+        </attribute>
+
+        <attribute>
+            <name>default</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+        </attribute>
+
+        <attribute>
+            <name>escapeXml</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+        </attribute>
+
+        <attribute>
+            <name>default</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+        </attribute>
+
+        <attribute>
+            <name>elipseRight</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+        </attribute>
+    </tag>
+
+</taglib>
+

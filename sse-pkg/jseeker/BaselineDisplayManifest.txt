@@ -1,0 +1,2 @@
+Main-Class: opensonata.dataDisplays.BaselineDisplay
+Class-Path: plot.jar

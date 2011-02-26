@@ -1,0 +1,6 @@
+This is a place to store large data files that are used
+as input to the sse package.
+
+./catalogs - target catalogs use for observing (and the sources used to create them)
+
+

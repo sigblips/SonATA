@@ -1,0 +1,46 @@
+Current SonATA Hardware Configuration
+2011-01-03
+
+SonATA is a 3 beam SETI observing system on the ATA.
+
+Input from the 3 dual polarization beamformers is received 
+by a Fujitsu 10GbE switch.
+
+Fujitsu XG2000 20 10GbE ports
+
+The data for each beam is redirected to a Dell 6224
+switch dedicated to that beam via 10GbE.
+
+3 Dell 6224 switches (4 10GbE ports, 24 1GbE ports)
+
+There is one C6100 dedicated to each beam. The beamformer
+data is received on sled 1 via 10GbE. There are 2 channelizers 
+running on sled 1, one for each polarization, producing 49 800KHz channels.
+The channels are sent to the other 3 sleds of the C6100
+via the 10GbE connection on the switch. The Dxs perform subchannelization
+and signal detection on the channels. There are 8 Dx processes per sled
+receiving their input via 1GbE. A total of 20MHz is currently being
+processed.
+
+PowerEdge C6100 Rack Server (3)
+4 sleds each with	
+2 Intel Xeon X5650 six-core processors
+48 GB memory
+250 GB Disk
+10 GbE card
+1 GbE card
+
+The control system and Archiver run on a C2100.
+
+PowerEdge C2100 Rack Server (1)
+1 sled
+2 Intel Xeon X5670 six-core processors
+48 GB Memory
+10-GbE card
+1-GbE card
+12 TB disk
+
+Future Development
+We have an additional 12 C6100s that will be added to the system
+to increase the bandwidth processed. There are issues with power,
+air conditioning, and network throughput that need to resolved first.

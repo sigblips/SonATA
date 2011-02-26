@@ -1,0 +1,50 @@
+#!/bin/sh
+
+# Run NOVAS checkout program, compare against expected results file.
+
+outfile="/tmp/novas-checkout-results-$$.txt"
+
+# Find data file whether being run directly or under automake/conf
+dataDir="$srcdir"
+if [ "$dataDir" = "" ]
+then
+    dataDir="."
+fi
+
+expectedResultsFile="$dataDir/checkout-st.no"
+
+# cleanup if ctrl-c is issued, or the script exits with an error
+trap cleanup INT QUIT ABRT ILL HUP KILL ALRM TERM
+
+cleanup()
+{
+    rm -f $outfile
+}
+
+./checkout > $outfile
+
+diff $outfile $expectedResultsFile > /dev/null
+diffStatus=$?
+
+returnStatus=1  # failure
+if [ $diffStatus -eq 0 ]
+then
+
+    #no diffs found, all ok
+    returnStatus=0
+
+elif [ $diffStatus -eq 1 ]
+then
+
+    echo "$0: checkout failed"
+    echo "$0: checkout results and $expectedResultsFile do not match"
+
+elif [ $diffStatus -gt 1 ]
+then
+
+    echo "$0: error running diff"
+fi
+
+cleanup
+
+exit $returnStatus

@@ -1,0 +1,33 @@
+#!/bin/bash
+
+PACKAGES_VERSION=packages_1.0
+PACKAGES_DIR=packages
+PACKAGES_FILE=$PACKAGES_VERSION.tar.gz
+
+cd ..
+wget http://setiquest.org/sonata_files/$PACKAGES_FILE
+tar zxvf $PACKAGES_FILE
+rm -fr $PACKAGES_FILE
+mv $PACKAGES_VERSION $PACKAGES_DIR
+
+PACKAGES_PATH=`pwd`/$PACKAGES_DIR
+ACE_ROOT=$PACKAGES_PATH/ACE_wrappers
+
+echo ""
+echo "###########################################################"
+echo ""
+echo "Package loading has finished. You now need to configure environment variables."
+echo "If you are using the bash shell please add these lines to your .bashrc file:"
+echo ""
+echo "export LD_LIBRARY_PATH=$ACE_ROOT/ace:$ACE_ROOT/lib:$PACKAGES_PATH/lib:\$LD_LIBRARY_PATH"
+echo ""
+echo "ulimit -s unlimited"
+echo ""
+echo ""
+
+echo "Or if you are using the csh shell then add these lines to your .cshrc file:"
+echo ""
+echo "setenv LD_LIBRARY_PATH \"$ACE_ROOT/ace:$ACE_ROOT/lib:$PACKAGES_PATH/lib:\$LD_LIBRARY_PATH\""
+echo ""
+echo "limit stacksize unlimited"
+

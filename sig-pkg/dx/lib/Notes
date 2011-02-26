@@ -1,0 +1,39 @@
+PdmQueue:
+	Ring queue vs. linked list
+		A linked list queue has one significant advantage: it
+		is not possible to fail on a send operation, since the
+		queue can never be full.
+		An advantage of using a ring FIFO as the queue is that,
+		unlike a linked list, there is no need to have a "next"
+		pointer in the data item.
+		A disadvantage is that it is necessary to interact with
+		two semaphores (send and receive) on all send and receive
+		operations, while the linked list queue must wait on
+		the receive semapore for a recv operation, but does not
+		require any semaphore operation on a send.
+
+Pdm messages:
+	Each message type has a class defined which provides for
+	initialization, destruction, marshalling and demarshalling.
+	All are derived from a base class (PdmMsg) which provides
+	a default behavior.  It may be better to define the
+	base class to allow no external data but to specify the
+	message type.  Then any message which uses no data could
+	use this base class.  An alternative would be to define a
+	class which contains no data (PdmNoDataMsg), but accepts
+	a message code during initialization.
+
+1/17/01
+PdmMsgList: if we allocated a single list and made it global,
+	we wouldn't have to pass the list pointer to every task.
+
+Pointers: need to check for NULL
+
+PdmLog: need to improve the log structure to allow logging of
+	variable strings, function names, file name and line
+	number, and error strings.
+
+ssePdmInterfaceHeader: add the PDM identifier to the message
+	type so that logging of message headers will be more
+	intelligible.  Have separate numbering systems for
+	main and remote (i.e., Main1/Remote2, etc.)?

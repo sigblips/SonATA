@@ -1,0 +1,147 @@
+################################################################################
+#
+# File:    README.dreher-doppler-doc
+# Project: OpenSonATA
+# Authors: The OpenSonATA code is the result of many programmers
+#          over many years
+#
+# Copyright 2011 The SETI Institute
+#
+# OpenSonATA is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+# 
+# OpenSonATA is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with OpenSonATA.  If not, see<http://www.gnu.org/licenses/>.
+# 
+# Implementers of this code are requested to include the caption
+# "Licensed through SETI" with a link to setiQuest.org.
+# 
+# For alternate licensing arrangements, please contact
+# The SETI Institute at www.seti.org or setiquest.org. 
+#
+################################################################################
+
+doppler is a routine that precesses a star from mean
+catalog position of J2000 to topcentric
+apparent position and provides accurate doppler
+corrections, including doppler drift rates caused
+by accelerations.  In addition to stars, it can handle
+spacecraft, the positional data for which are found
+from tabular ephemerides prepared using the NAIF toolkit
+developed at JPL.  (the same routines are used to
+generate the ephemerides for the earth.)  The naif
+routines are located on 'anor' at present in ~dreher/naif.
+
+Doppler uses the djinn user interface.  This requires
+access to djinn.ar, currently residing on elendil
+and anor in ~dreher/lib.  The user interface is
+idientical to that used for the Serendip data
+reduction package I wrote, and very similar to
+the standard AIPS interface familiar to many astronomers.
+
+Much of the calculation is done in the doppler.work.c
+module.  The precession work is done by routines from the 
+meeus package. I have consolidated the nutation,
+obliquity, and equation of equinoxes routines into
+one module precession.c  The position for the earth
+and the target are determined by position(), which
+can be found in readephem.c
+
+There is an annoying bug in the ephemerides: at present, the
+interpolation variable is UTC; but UTC is not continuous over
+leap seconds.  The naif routines actually calculate equal ET
+steps -- these are NOT precesiely equal in UTC, alas.  For
+now, I'll just avoid the dates that have leap seconds in
+preparing the epehemris tables. In the longer term, the
+tables should be prepared with JD ET as the time argument,
+and doppler.work.c should use JDET as its calling arg.
+This will require another input to the SCS: delta ET - UTC.
+
+Another problem lies in the NAIF toolkit.  Their routines handle
+postions and velocities in a newtonian approximation.  Since v/c
+is of order 1e-5 to 1e-4 for planets etc, the (v/c)^2 error terms
+are not completely negligible for precesion doppler.  Fortunately,
+the _differential_ topocentric doppler shifts are not affected,
+nor are the corrections for a star.  Only spacecraft will have errors.
+In addition, I reconvert to barycentric for the doppler calcs,
+using newtonian velocity correction, so I _may_ remove the errors,
+but I wouldn't count on it.  For one thing, I don't know how the
+original spacecraft 'cruise' ephemerides were produced.  In any event,
+the on-board oscillators are unstable at the kHz level, so it really
+doesn't matter much.
+
+Comparison with the two of the observations from the PT-LA VLBA run shows
+
+1.  predicted freq (from DSN value of fxmit) agree more closely with
+the observed values than my spreadsheet/hybrid system did.  For Galileo,
+4 Hz off.  For Pioneer 11, whose oscillator drifts by kHz, got within
+70 Hz (using best updated DSN values from the previous weeks). It may
+not be worth our while, however, to keep track of the on-board oscillator
+frequencies and the illumination schedules. The oscillator on Pioneer
+wanders by kHz.  That on Galileo is fairly stable.  Illumination can
+shift Galileo freq by around +2 MHz, large, but still within MCSA.  From
+the DSN predict sheets I deduce that the ofset is much less for the
+Pioneers -- only a few kHz.
+
+2. the LA-PT freqs calculated agree quite well with my previous calculations.
+Alas, both disagree slightly with the observations.  For Pioneer, the
+difference (in the frequency difference) between observed and calculated is
+up to 0.14 Hz.  For Galileo, it was <0.04 Hz.  My suspicion is that the
+observations are wrong :-)  The data I used were from the FUDD without
+decurvature: rereduction with curvature removed will, I hope, shift the
+observed values to agree with the calculations.
+
+3. the drift rates calculated agree with those observed to about 0.004 Hz/s
+or less.  The delta drift between PT and LA seems to with the observations
+to the resolution of the FUDDs (about 1e-4 Hz/s).
+
+4. The curvatures calculated agree nicely with those I calculated earlier,
+which are known to work when applied to the FUDD observations we recorded.
+
+
+doppler.main.c invokes user interface, stuffs parameters, opens/closes files
+doppler.work.c does most of the work
+precession.c has a selection of routins from meeus package to do precession and nutation
+readephem.c reads an ephemeris table (ascii) and interpolates a position and velocity
+doppler.comm.c has the command definitions for the djinn interface for precess
+
+95jan16, mean sidereal coded, working on apparent.
+95jan21, apparent geocentric looks OK, working on topocentric
+95jan22, added earth acceleration, diurnal parallax, diurnal abb, diurnal doppler.  Just need drifts
+95jan23, drifts in, parallax for barycenter spacecraft in, need vel and acc and f0.
+95jan24, rect_to_radec and vv modified for range.  Added commands to support spacecraft.
+95jan25, put in calcs for spacecraft motion doppler etc, predicted freqs
+95jan26, checking calcs, found small bug at leap sec in ephemerides
+95jan27, made topcentric stuff into subroutine.  Added JD to star struct and checked in
+	 doppler_work.  Found error in hour angle calcs, diurnal abberation calc.
+95jan29, made site data into struct, added foffsets, verbosity
+	 tests show that it all seems to work: declared it a BETA version
+95feb03, use in single station observing has not yet uncovered any bugs
+	 bringing geocentric unabberated J2000 calc up to 'terse' level since
+	 	it is needed in preparing observing files
+	 designated version BETA 1.1
+95jun02	noticed bug for stars; for stars we have no predicted freq, this is flagged
+	as -1 for the predicted freq.  the topo calcs did not pass the -1 through,
+	and list_app ended up trying to print an uninitialized variable: ugly but not
+	actually harmful.  Fixed
+98sep13	added printout of doppler factor ratio for comparison to SCS, 
+	also apparent fx and 9 places in freq to match SCS. 
+
+other known bugs: when looking at star using geocentric origin (unusual)
+the abberation from orbital motion seems to be included (when it should
+not be).  When printing a negative topocentric LAHA, it's OK in radians,
+but the sign does not get printed in the h m s field.  Need to double
+check against Meeus -- seemed to get a different answer for case of
+_mean_ precession when I ran a test program for WB on Sun/Solaris -- possible
+numerical probelm or maybe pilot error :-(?
+
+BIG BUG: doesn't do topo doppler correction quite right for nearby spacecraft
+Also, when using f, fdot, fdoubledot to extapolate P6 forward 100 seconds,
+don't get the same result as calculating it directly at t+100 seconds!!

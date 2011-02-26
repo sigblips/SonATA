@@ -1,0 +1,102 @@
+/*******************************************************************************
+
+ File:    tables.css
+ Project: OpenSonATA
+ Authors: The OpenSonATA code is the result of many programmers
+          over many years
+
+ Copyright 2011 The SETI Institute
+
+ OpenSonATA is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+ 
+ OpenSonATA is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+ 
+ You should have received a copy of the GNU General Public License
+ along with OpenSonATA.  If not, see<http://www.gnu.org/licenses/>.
+ 
+ Implementers of this code are requested to include the caption
+ "Licensed through SETI" with a link to setiQuest.org.
+ 
+ For alternate licensing arrangements, please contact
+ The SETI Institute at www.seti.org or setiquest.org. 
+
+*******************************************************************************/
+
+.genericTbl {
+    color: #4f6b72;
+}
+
+.genericTbl a:link, .genericTbl a:active, .genericTbl th a:visited {
+    color: #4f6b72;
+    text-decoration: none;
+    border-bottom: 1px dashed #4f6b72;
+}
+
+.genericTbl th a:hover {
+    color: #000;
+    border-bottom: 1px solid #000;
+}
+
+.genericTbl {
+    background-color: #fff;
+    width: 100%;
+    font-size: 95%;
+    font-style: normal;
+    padding: 0;
+    margin: 0;
+}
+
+.genericTbl th, .genericTbl td {
+    padding: 1px 5px 2px 5px;
+}
+
+.genericTbl th {
+/*color: #4f6b72;*/
+    border-top: 1px solid #C1DAD7;
+    text-transform: uppercase;
+    text-align: left;
+    background-color: #CAE8EA;
+}
+
+.genericTbl td {
+    border-right: 1px solid #C1DAD7;
+    border-bottom: 1px solid #C1DAD7;
+    margin: 0; /*color: #4f6b72;*/
+}
+
+.genericTbl td.leftmost {
+    border-left: 1px solid #C1DAD7;
+}
+
+.genericTbl tr.even {
+    background: lightyellow;
+}
+
+.genericTbl tr:hover {
+    background-color: aliceblue;
+}
+
+.genericTbl td a:link, .genericTbl a:visited {
+    color: #40659B;
+    text-decoration: none;
+    border-bottom: 1px none;
+}
+
+.genericTbl td a:hover, .genericTbl td:hover a {
+    color: #003366;
+    border-bottom: 1px dashed #bbb;
+}
+
+.genericTbl td a.imglink:hover,  .genericTbl td:hover a.imglink {
+    border-bottom: none;
+}
+
+.highlighted {
+    background-color: #FFF0F0;
+}

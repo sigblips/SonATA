@@ -1,0 +1,53 @@
+Data Rates for SonATA
+2011-02-22 jj
+
+The total data rate out of each beamformer is 104.8576MHz, but
+the usable digital bandwidth is 72 MHz. 
+
+104.8576 MHz / 2048 samples/packets = 51,200 packets/sec
+
+1 beam = 51,200 packets/sec*4144 bytes/packet*8 bits/byte*2 pol = 3.395 Gbps
+
+There is only one connection from each beamformer to the 10GbE switch.
+It carries both pols for that beamformer.
+
+Each channelizer processes only one polarization from one beam.
+The data rate going into each channelizer is half of 
+the beamformer rate, 1.697 Gbs on a 10GbE connection.
+
+Each channelizer reads the entire 104 MHz and applies a digital filter
+bank (DFB) to create 256 400KHz channels or 128 800 KHz channels. 
+A total of 176 output channels are possible;
+The current observing system can process 20 MHz or 24 800 KHz channels.
+The outside channels are discarded 
+
+Each channel is oversampled, having a bandwidth of 1.0922667 MHz.
+Oversampling is reciprocal, so the bandwidth is 
+	.8192 MHz / (1 - .25) = 1.0922667 MHz 
+
+The output rate for each single pol channel is:
+
+   1.0922667 MHz / 1024 samples/packet = 1067 packets/sec
+   1067 packets/sec * 4144bytes/packet * 8 bits/byte = 35.37 Mbs
+
+Each Channelizer transmits 49 channels:
+
+	49 * 35.37 Mbs = 3.11 Gbs
+
+Each dual pol beam has a data rate of 6.22 Gbs.
+The total for 3 dual pol beams is 18.67 Gbs.
+This data rate necessitates having 3 10GbE connections
+between the 10GbE switch and the fanout switches.
+
+Input to the DX server is 1GbE. 
+One Dx process receives and processes both polarizations for one channel.
+A Dx server can run 12-24 Dx processes depending on the capacity of the Dx server.
+
+Dual Pol channel data rate is 35.36 Mbs.
+
+12 channels per dx host:   12 * 35.36 Mbs = 424.3 Mbs
+16 channels per dx host:   16 * 35.34 Mbs = 565.76 Mbs
+20 channels per dx host:   20 * 35.34 Mbs = 707.2 Mbs
+24 channels per dx host:   24 * 35.36 Mbs = 848.64 Mbs
+(24 is probably the absolute maximum we could hope for
+over a single 1 GbE interface). 

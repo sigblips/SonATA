@@ -1,0 +1,86 @@
+/*******************************************************************************
+
+ File:    deploy.css
+ Project: OpenSonATA
+ Authors: The OpenSonATA code is the result of many programmers
+          over many years
+
+ Copyright 2011 The SETI Institute
+
+ OpenSonATA is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+ 
+ OpenSonATA is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+ 
+ You should have received a copy of the GNU General Public License
+ along with OpenSonATA.  If not, see<http://www.gnu.org/licenses/>.
+ 
+ Implementers of this code are requested to include the caption
+ "Licensed through SETI" with a link to setiQuest.org.
+ 
+ For alternate licensing arrangements, please contact
+ The SETI Institute at www.seti.org or setiquest.org. 
+
+*******************************************************************************/
+
+div.deploy {
+    padding: 10px 10px 10px 10px;
+    margin: 0 0 10 0;
+    border: 1px solid #ccc;
+    vertical-align: middle;
+    min-width: 700px;
+}
+
+div.deploy div.deployDescription {
+    padding: 5px 50px 15px 0px;
+}
+
+div.deploy .deployLabel {
+    border: 1px dashed white;
+    padding: 0px 5px 0px 5px;
+    background: darkorange;
+    color: white;
+    font-weight: bold;
+
+}
+
+div.deploy .submit {
+    text-align: right;
+    padding-top: 15px;
+    padding-right: 30px;
+}
+
+div.deploy .submit input.b {
+    font-size: 90%;
+    font-weight: bold;
+    padding: 2 4 2 4;
+    border: 1px solid darkorange;
+    background: white;
+    color: rgb( 230, 44, 0 );
+}
+
+div#deployScenario1 {
+    background-color: lightyellow;
+    margin-bottom: 10px;
+}
+
+.cb input {
+    margin-left: 0;
+}
+
+em {
+    color: rgb( 204, 0, 0 );
+    font-weight: bold;
+    font-style: normal;
+}
+
+.deploy dl dd {
+    margin: 0;
+    padding: 0 0 1em 0;
+    line-height: 1.5em;
+}

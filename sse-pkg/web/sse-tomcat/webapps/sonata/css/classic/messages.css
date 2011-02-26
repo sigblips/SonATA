@@ -1,0 +1,121 @@
+/*******************************************************************************
+
+ File:    messages.css
+ Project: OpenSonATA
+ Authors: The OpenSonATA code is the result of many programmers
+          over many years
+
+ Copyright 2011 The SETI Institute
+
+ OpenSonATA is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+ 
+ OpenSonATA is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+ 
+ You should have received a copy of the GNU General Public License
+ along with OpenSonATA.  If not, see<http://www.gnu.org/licenses/>.
+ 
+ Implementers of this code are requested to include the caption
+ "Licensed through SETI" with a link to setiQuest.org.
+ 
+ For alternate licensing arrangements, please contact
+ The SETI Institute at www.seti.org or setiquest.org. 
+
+*******************************************************************************/
+
+div#errorMessage, div#successMessage {
+    margin: 0 5% 20px 5%;
+    padding: 20px 20px 20px 20px;
+    border: 1px dashed #666;
+    font-weight: bold;
+    /*clear: both;*/
+    text-align: center;
+}
+
+div#errorMessage {
+    color: crimson;
+}
+
+div#errorMessage b {
+    font-size: 14px;
+    font-variant: small-caps;
+    color: forestgreen;
+}
+
+
+div#successMessage {
+    color: green;
+}
+
+div.errorMessageDetails {
+    margin: 0 5% 20px 5%;
+    padding: 10px 10px 10px 10px;
+    color: black;
+    font-size: 10px;
+    font-weight: bold;
+    background-color: lightpink;
+    border: 1px dashed #666;
+}
+
+div.codesample {
+    margin: 0 5% 20px 5%;
+    padding: 10px 10px 10px 10px;
+    font-size: 11px;
+    color: black;
+    background-color: beige;
+}
+
+.errorMessage, .warningMessage, .infoMessage {
+    margin: 30px 50px 25px 50px;
+}
+
+.errorMessage {
+    border-top: 2px solid #FF3333;
+    border-bottom:  2px solid #FF3333;
+    background: #FFECEC;
+}
+
+.warningMessage {
+    background: #FFFFCC;
+    border-top: 2px solid #FBEACF;
+    border-bottom: 2px solid #FBEACF;
+}
+
+.infoMessage {
+    background: #DFFFDF;
+    border-top: 2px solid #6FFF6F;
+    border-bottom: 2px solid #6FFF6F;
+}
+
+.helpMessage{
+    background: #FFFFF0;
+    border-top: 2px solid #FFCC66;
+    border-bottom: 2px solid #FFCC66;
+    margin-bottom: 10px;
+}
+
+.errorMessage p, .warningMessage p, .infoMessage p {
+    padding: 5px 30px 5px 30px;
+    color: #A80000;
+    font-weight: bold;
+}
+
+.helpMessage p {
+    padding: 5px 30px 5px 30px;
+    color: #222222;
+}
+
+.helpMessage em {
+    color: #000099;
+    font-weight: bold;
+    font-style: normal;
+}
+
+.errorMessage p, .warningMessage p, .infoMessage p {
+    text-align: center;
+}

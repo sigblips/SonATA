@@ -1,0 +1,89 @@
+<!doctype html public "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <meta name="Author" content="Jane Jordan">
+   <meta name="GENERATOR" content="Mozilla/4.5 [en] (Win95; I) [Netscape]">
+   <title>SonATA System Architecture</title>
+</head>
+<body>
+
+<center>
+<h3>
+SonATA System Architecture Description</h3></center>
+
+
+<u><h3>Overview:</h3></u>
+<p>The SonATA software is primarily written in C++, with some
+java and tcl. There are two main sections of the code: 
+<li> SSE (Search System Executive) is the Control System.
+<li> Signal Processing code which includes the Channelizer
+and the DX detector.
+<p>
+
+<b>SSE/Control System:</b>
+<p>There are three C++ executables in the Control System.
+<li> Seeker : contains the User Interface and Scheduler as
+well as the actual observation control. The various Seeker classes
+maintain the observation and signal histories in a Mysql database. 
+<li> Archiver : writes the science data from the DXs to the archive. 
+<li> Tscope : Telescope and Beamformer Interface.
+
+<p>
+There is a Java executable for simulating the 
+telescope in test mode.
+<p>
+And there are additional java programs to display the science data
+(baselines and complex amplitudes).
+<p>Internal Libraries:
+<li>Doppler: Doppler corrections for target positions
+<li>ssecommutil: Interprocess communication routines
+<li>sseInterfaceLib: 
+<li>sseTscopeInterfaceLib
+<li>sseDxArchiverLib
+<li>sseDxInterfaceLib
+<li>sseutil
+<li>util
+<p>External Libraries:
+<li>aaplusLib: Astronomy routines for coordinate conversion.
+<li>novasLib: Astronomy routines for coordinate conversion.
+<li>wcsLib: Astronomy routines for coordinate conversion.
+<p>
+<A HREF="SonATAPackageDependencies.html">External Package Dependencies</a>
+
+<p>
+<b>Signal Processing:</b>
+<p>There are two C++ executables
+<li> Channelizer
+<li> DX
+<p>There are four additional executables used for testing.
+<li>packetgen: generates noise and signal. Writes to disk or to network(multicast).
+<li>packetsend: Reads data from disk and sends to network (multicast)
+<li>packetread: Reads Multicast packets from network and prints a summary of packets received.
+<li>packetrelay: Reads Unicast/Multicast packets from network and writes to disk or retransmits as Multicast
+<p>Internal libraries
+<li>dfbLib: Digital filter Bank Library
+<li>sonataLib: Queue, Semaphore, Lock, message, etc. Classes
+<li>spectraLib: Spectra Class
+<li>ATAPackets: ATA Packet Header Classes
+<li>reader: Packet receiver for testing
+<p>External Libraries
+<li>fftw-3.2.1
+<p><b>System Configuration</b>
+<p>
+The SonATA system is designed to run in a multi-host environment.
+The high speed data transfer is done using UDP Multicast on
+10 Gb switches.
+The 20 MHz bandwidth current observing system consists of over thirteen hosts.
+<li>1 for Control system and Archivers
+<li>3 for the Channelizers
+<li>9 for the DXs
+<p>
+The minimum test system can run on a single host, running all the executables.
+<li> SSE: Seeker, Telescope Interface, telescope Simulator, Archiver, display programs
+<li> SP: 1 single polarization Channelizer
+<li> SP: 1 single polarization DX 
+<li> SP: Beamformer Simulator/Packet Generator
+
+</body>
+</html>

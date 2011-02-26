@@ -1,0 +1,75 @@
+#!/bin/sh
+################################################################################
+#
+# File:    createSpacecraftCatalog
+# Project: OpenSonATA
+# Authors: The OpenSonATA code is the result of many programmers
+#          over many years
+#
+# Copyright 2011 The SETI Institute
+#
+# OpenSonATA is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+# 
+# OpenSonATA is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with OpenSonATA.  If not, see<http://www.gnu.org/licenses/>.
+# 
+# Implementers of this code are requested to include the caption
+# "Licensed through SETI" with a link to setiQuest.org.
+# 
+# For alternate licensing arrangements, please contact
+# The SETI Institute at www.seti.org or setiquest.org. 
+#
+################################################################################
+
+
+# create list of spacecraft to be loaded into the seeker database
+# TargetCat and Spacecraft tables
+
+catalog="spacecraft"
+autoschedule="No"
+
+printDbLine()
+{
+   targetId="$1"
+   name="$2"
+   ephemFilename="$3"
+
+   echo "insert into TargetCat(targetId, catalog, autoschedule, aliases) values ($targetId, '$catalog', '${autoschedule}', '${name}');"
+
+   echo "insert into Spacecraft(targetId, name, ephemFilename) values ($targetId, '$name', '$ephemFilename');"
+
+}
+
+echo "-- seeker spacecraft/moving target data "
+
+printDbLine 100 "movingTarget" ""
+printDbLine 101 "Pioneer10" ""
+printDbLine 106 "Pioneer6" ""
+printDbLine 108 "Pioneer8" ""
+printDbLine 111 "Pioneer11" ""
+printDbLine 121 "Galileo" ""
+printDbLine 125 "Ulysses" "ulysses.xyz"
+printDbLine 131 "Voyager1" "voyager1.xyz"
+printDbLine 132 "Voyager2" ""
+printDbLine 144 "Moon" "moon.xyz"
+printDbLine 150 "Mercury" "mercury.xyz"
+printDbLine 151 "Venus" "venus.xyz"
+printDbLine 152 "Mars" "mars.xyz"
+printDbLine 153 "Jupiter" "jupiter.xyz"
+printDbLine 154 "Saturn" "saturn.xyz"
+printDbLine 160 "Rosetta" "rosetta.xyz"
+printDbLine 161 "Messenger" "messenger.xyz"
+printDbLine 162 "Geotail" "geotail.xyz"
+printDbLine 163 "Hayabusa" ""
+printDbLine 164 "Stardust" ""
+printDbLine 210 "Zenith" ""
+
+

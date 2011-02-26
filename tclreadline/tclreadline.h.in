@@ -1,0 +1,40 @@
+
+ /* ==================================================================
+    FILE: "/home/joze/src/tclreadline/tclreadline.h.in"
+    LAST MODIFICATION: "Mit, 20 Sep 2000 17:18:12 +0200 (joze)"
+    (C) 1998 - 2000 by Johannes Zellner, <johannes@zellner.org>
+    $Id: tclreadline.h.in,v 1.1.1.1 2002/02/28 21:23:50 kilsdonk Exp $
+    vim:set ft=c:
+    ---
+    tclreadline -- gnu readline for tcl
+    http://www.zellner.org/tclreadline/
+    Copyright (c) 1998 - 2000, Johannes Zellner <johannes@zellner.org>
+    This software is copyright under the BSD license.
+    ================================================================== */  
+
+#ifndef TCLREADLINE_H_
+#define TCLREADLINE_H_
+
+#include <tcl.h>
+
+#define TCLRL_LIBRARY        "@TCLRL_DIR@"
+
+/* VERSION STRINGS */
+#define TCLRL_VERSION_STR    "@VERSION@"
+#define TCLRL_PATCHLEVEL_STR "@PATCHLEVEL_STR@"
+
+/* VERSION NUMBERS */
+#define TCLRL_MAJOR      @MAJOR@
+#define TCLRL_MINOR      @MINOR@
+#define TCLRL_PATCHLEVEL @PATCHLEVEL@
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+int Tclreadline_Init(Tcl_Interp *interp);
+int Tclreadline_SafeInit(Tcl_Interp *interp);
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* TCLREADLINE_H_ */

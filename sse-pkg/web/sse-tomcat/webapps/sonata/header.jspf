@@ -1,0 +1,124 @@
+<%--
+
+ File:    header.jspf
+ Project: OpenSonATA
+ Authors: The OpenSonATA code is the result of many programmers
+          over many years
+
+ Copyright 2011 The SETI Institute
+
+ OpenSonATA is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+ 
+ OpenSonATA is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+ 
+ You should have received a copy of the GNU General Public License
+ along with OpenSonATA.  If not, see<http://www.gnu.org/licenses/>.
+ 
+ Implementers of this code are requested to include the caption
+ "Licensed through SETI" with a link to setiQuest.org.
+ 
+ For alternate licensing arrangements, please contact
+ The SETI Institute at www.seti.org or setiquest.org. 
+
+--%>
+
+<div id="topMenu" style="">
+
+<%-- Common header for all pages (jsp fragment)  --%>
+<%@ include file="taglibsHeader.jspf" %>
+
+SonATA Operations:
+
+<%-- current date/time in utc --%>
+&nbsp; &nbsp;
+<jsp:useBean id="date" class="java.util.Date" />
+<fmt:formatDate pattern="yyyy-MM-dd HH:mm:ss z" timeZone="UTC" value="${date}" />
+
+<%-- login status --%>
+&nbsp; &nbsp;
+(Logged:  
+<%
+  if (request.isUserInRole("observer")) {
+	out.print("in");
+  }
+  else {
+	out.print("out");
+  }
+%>
+)
+<sonatautils:menuItem toPage="/protected/directLogin.jsp">
+<b>Login</b>
+</sonatautils:menuItem>
+|
+<sonatautils:menuItem toPage="/logout.jsp">
+<b>Logout</b>
+</sonatautils:menuItem>
+
+<%-- refresh pause state --%>
+&nbsp; &nbsp;
+Refresh:
+<c:choose>
+<c:when test="${autoRefresh == 'off'}">
+  <b>Off</b> | <a href="/refreshOn.jsp">On</a>
+</c:when>
+<c:otherwise>
+  <a href="/refreshOff.jsp">Off</a> | <b>On</b>
+</c:otherwise>
+</c:choose>
+
+<br>
+
+<sonatautils:menuItem toPage="/index.jsp">
+<b>Home</b>
+</sonatautils:menuItem>
+|
+<sonatautils:menuItem toPage="/showStatusSummary.jsp">
+<b>Status</b>
+</sonatautils:menuItem>
+|
+<sonatautils:menuItem toPage="/systemStatus.jsp">
+<b>StatusDetail</b>
+</sonatautils:menuItem>
+|
+<sonatautils:menuItem toPage="/recentCand.jsp">
+<b>Cand</b>
+</sonatautils:menuItem>
+|
+<sonatautils:menuItem toPage="/obsHist.jsp">
+<b>ObsHist</b>
+</sonatautils:menuItem>
+|
+<sonatautils:menuItem toPage="/viewLogs.jsp">
+<b>Logs</b>
+</sonatautils:menuItem>
+|
+<sonatautils:menuItem toPage="/examineArchive.jsp">
+<b>Archive</b>
+</sonatautils:menuItem>
+|
+<sonatautils:menuItem toPage="/exploreDatabase.jsp">
+<b>DbQueries</b>
+</sonatautils:menuItem>
+|
+<sonatautils:menuItem toPage="/pointingmap.jsp">
+<b>PointMap</b>
+</sonatautils:menuItem>
+|
+<sonatautils:menuItem toPage="/protected/seekerCmd.jsp">
+<b>SeekerCmd</b>
+</sonatautils:menuItem>
+|
+<sonatautils:menuItem toPage="/protected/systemControl.jsp">
+<b>SysCntl</b>
+</sonatautils:menuItem>
+
+<hr>
+</div>  <%-- topMenu --%>
+
+

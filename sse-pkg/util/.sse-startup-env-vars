@@ -1,0 +1,43 @@
+################################################################################
+#
+# File:    .sse-startup-env-vars
+# Project: OpenSonATA
+# Authors: The OpenSonATA code is the result of many programmers
+#          over many years
+#
+# Copyright 2011 The SETI Institute
+#
+# OpenSonATA is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+# 
+# OpenSonATA is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with OpenSonATA.  If not, see<http://www.gnu.org/licenses/>.
+# 
+# Implementers of this code are requested to include the caption
+# "Licensed through SETI" with a link to setiQuest.org.
+# 
+# For alternate licensing arrangements, please contact
+# The SETI Institute at www.seti.org or setiquest.org. 
+#
+################################################################################
+
+# sse environment variables
+
+# .sse-startup-env-vars
+
+RUNSSE_IFC1_PDMS="pdm16 pdm14 pdm17 pdm31 pdm30 pdm38 pdm42 pdm0 pdm11 pdm28 pdm29 pdm10 pdm18 pdm22 pdm21 pdm32 pdm36 pdm33 pdm6 pdm8 pdm15 pdm35 pdm1"
+export RUNSSE_IFC1_PDMS
+
+SSE_DEBUG_LOG_MAX_FILESIZE_MEGABYTES=200
+export SSE_DEBUG_LOG_MAX_FILESIZE_MEGABYTES
+
+CONTROL_COMPONENTS_ANT_CONTROL_HOST=tumulus.hcro.org
+#CONTROL_COMPONENTS_ANT_CONTROL_HOST=localhost
+export CONTROL_COMPONENTS_ANT_CONTROL_HOST

@@ -1,0 +1,5 @@
+Makefile
+Makefile.in
+ifctclsh
+Ifc_wrap.cpp
+Ifc_wrap.doc

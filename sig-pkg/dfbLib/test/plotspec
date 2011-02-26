@@ -1,0 +1,3 @@
+set style data line
+set xtics 64
+set yrange[-120:20]

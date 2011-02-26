@@ -1,0 +1,14 @@
+config.log
+stamp-h
+libtool
+config.status
+config.cache
+tclreadlineInit.tcl
+tclreadlineSetup.tcl
+tclreadline.n
+pkgIndex.tcl
+INSTALL
+libtclreadline.la
+tclreadline.lo
+tclreadline.n
+.libs

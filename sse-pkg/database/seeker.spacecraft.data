@@ -1,0 +1,120 @@
+################################################################################
+#
+# File:    seeker.spacecraft.data
+# Project: OpenSonATA
+# Authors: The OpenSonATA code is the result of many programmers
+#          over many years
+#
+# Copyright 2011 The SETI Institute
+#
+# OpenSonATA is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+# 
+# OpenSonATA is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with OpenSonATA.  If not, see<http://www.gnu.org/licenses/>.
+# 
+# Implementers of this code are requested to include the caption
+# "Licensed through SETI" with a link to setiQuest.org.
+# 
+# For alternate licensing arrangements, please contact
+# The SETI Institute at www.seti.org or setiquest.org. 
+#
+################################################################################
+
+-- seeker spacecraft/moving target data 
+insert into TargetCat(targetId, catalog, autoschedule, aliases) values (100, 'spacecraft', 'No', 'movingTarget');
+insert into Spacecraft(targetId, name, autoDetect, ephemFilename) values (100, 'movingTarget', 'No', '');
+
+insert into TargetCat(targetId, catalog, autoschedule, aliases) values (101, 'spacecraft', 'No', 'Pioneer10');
+insert into Spacecraft(targetId, name, autoDetect, ephemFilename) values (101, 'Pioneer10', 'No', '');
+
+insert into TargetCat(targetId, catalog, autoschedule, aliases) values (106, 'spacecraft', 'No', 'Pioneer6');
+insert into Spacecraft(targetId, name, autoDetect, ephemFilename) values (106, 'Pioneer6', 'No', '');
+
+insert into TargetCat(targetId, catalog, autoschedule, aliases) values (108, 'spacecraft', 'No', 'Pioneer8');
+insert into Spacecraft(targetId, name, autoDetect, ephemFilename) values (108, 'Pioneer8', 'No', '');
+
+insert into TargetCat(targetId, catalog, autoschedule, aliases) values (111, 'spacecraft', 'No', 'Pioneer11');
+insert into Spacecraft(targetId, name, autoDetect, ephemFilename) values (111, 'Pioneer11', 'No', '');
+
+insert into TargetCat(targetId, catalog, autoschedule, aliases) values (121, 'spacecraft', 'No', 'Galileo');
+insert into Spacecraft(targetId, name, autoDetect, ephemFilename) values (121, 'Galileo', 'No', '');
+
+insert into TargetCat(targetId, catalog, autoschedule, aliases) values (125, 'spacecraft', 'No', 'Ulysses');
+insert into Spacecraft(targetId, name, autoDetect, ephemFilename) values (125, 'Ulysses', 'No', '');
+
+insert into TargetCat(targetId, catalog, autoschedule, aliases) values (131, 'spacecraft', 'No', 'Voyager1');
+insert into Spacecraft(targetId, name,  xmit1FreqMhz, xmit2FreqMhz, autoDetect, ephemFilename) values (131, 'Voyager1', 8415.000, 8420.432, 'Yes', 'voyager1.xyz');
+
+insert into TargetCat(targetId, catalog, autoschedule, aliases) values (132, 'spacecraft', 'No', 'Voyager2');
+insert into Spacecraft(targetId, name, autoDetect, ephemFilename) values (132, 'Voyager2', 'No', '');
+
+insert into TargetCat(targetId, catalog, autoschedule, aliases) values (144, 'spacecraft', 'No', 'Moon');
+insert into Spacecraft(targetId, name, autoDetect, ephemFilename) values (144, 'Moon', 'No', 'moon.xyz');
+
+insert into TargetCat(targetId, catalog, autoschedule, aliases) values (150, 'spacecraft', 'No', 'Mercury');
+insert into Spacecraft(targetId, name, autoDetect, ephemFilename) values (150, 'Mercury', 'No', '');
+
+insert into TargetCat(targetId, catalog, autoschedule, aliases) values (151, 'spacecraft', 'No', 'Venus');
+insert into Spacecraft(targetId, name, autoDetect, ephemFilename) values (151, 'Venus', 'No', '');
+
+insert into TargetCat(targetId, catalog, autoschedule, aliases) values (152, 'spacecraft', 'No', 'Mars');
+insert into Spacecraft(targetId, name, autoDetect, ephemFilename) values (152, 'Mars', 'No', 'mars.xyz');
+
+insert into TargetCat(targetId, catalog, autoschedule, aliases) values (153, 'spacecraft', 'No', 'Jupiter');
+insert into Spacecraft(targetId, name, autoDetect, ephemFilename) values (153, 'Jupiter', 'No', '');
+
+insert into TargetCat(targetId, catalog, autoschedule, aliases) values (154, 'spacecraft', 'No', 'Saturn');
+insert into Spacecraft(targetId, name, autoDetect, ephemFilename) values (154, 'Saturn', 'No', 'saturn.xyz');
+
+insert into TargetCat(targetId, catalog, autoschedule, aliases) values (160, 'spacecraft', 'No', 'Rosetta');
+insert into Spacecraft(targetId, name, xmit1FreqMhz, autoDetect, ephemFilename) values (160, 'Rosetta', 8421.790, 'Yes', 'rosetta.xyz');
+
+insert into TargetCat(targetId, catalog, autoschedule, aliases) values (161, 'spacecraft', 'No', 'Messenger');
+insert into Spacecraft(targetId, name, xmit1FreqMhz, autoDetect, ephemFilename) values (161, 'Messenger', 8432.654, 'No', '');
+
+insert into TargetCat(targetId, catalog, autoschedule, aliases) values (162, 'spacecraft', 'No', 'Geotail');
+insert into Spacecraft(targetId, name, autoDetect, ephemFilename) values (162, 'Geotail', 'No', '');
+
+insert into TargetCat(targetId, catalog, autoschedule, aliases) values (163, 'spacecraft', 'No', 'Hayabusa');
+insert into Spacecraft(targetId, name, autoDetect, ephemFilename) values (163, 'Hayabusa', 'No', '');
+
+insert into TargetCat(targetId, catalog, autoschedule, aliases) values (164, 'spacecraft', 'No', 'Stardust');
+insert into Spacecraft(targetId, name, xmit1FreqMhz, autoDetect, ephemFilename) values (164, 'Stardust', 8415.000, 'Yes', 'stardust.xyz');
+
+insert into TargetCat(targetId, catalog, autoschedule, aliases) values (165, 'spacecraft', 'No', 'Dawn');
+insert into Spacecraft(targetId, name, xmit1FreqMhz, autoDetect, ephemFilename) values (165, 'Dawn', 8435.370, 'Yes', 'dawn.xyz');
+
+insert into TargetCat(targetId, catalog, autoschedule, aliases) values (166, 'spacecraft', 'No', 'DeepImpact');
+insert into Spacecraft(targetId, name, xmit1FreqMhz, autoDetect, ephemFilename) values (166, 'DeepImpact', 8435.370, 'Yes', 'deepimpact.xyz');
+
+insert into TargetCat(targetId, catalog, autoschedule, aliases) values (167, 'spacecraft', 'No', 'NewHorizons');
+insert into Spacecraft(targetId, name, xmit1FreqMhz, xmit2FreqMhz, autoDetect, ephemFilename) values (167, 'NewHorizons', 8437.895, 8438.182, 'Yes', 'newhorizons.xyz');
+
+insert into TargetCat(targetId, catalog, autoschedule, aliases) values (168, 'spacecraft', 'No', 'PhoenixLander');
+insert into Spacecraft(targetId, name, autoDetect, ephemFilename) values (168, 'PhoenixLander', 'No', '');
+
+insert into TargetCat(targetId, catalog, autoschedule, aliases) values (169, 'spacecraft', 'No', 'Cassini');
+insert into Spacecraft(targetId, name, xmit1FreqMhz, xmit2FreqMhz, autoDetect, ephemFilename) values (169, 'Cassini', 8427.222, 8429.938, 'Yes', 'cassini.xyz');
+
+insert into TargetCat(targetId, catalog, autoschedule, aliases) values (170, 'spacecraft', 'No', 'MarsExpress');
+insert into Spacecraft(targetId, name, xmit1FreqMhz, autoDetect, ephemFilename) values (170, 'MarsExpress', 8420.432, 'No', 'mars.xyz');
+
+insert into TargetCat(targetId, catalog, autoschedule, aliases) values (171, 'spacecraft', 'No', 'MarsRO');
+insert into Spacecraft(targetId, name, xmit1FreqMhz, autoDetect, ephemFilename) values (171, 'MarsRO', 8439.444, 'No', 'mars.xyz');
+
+insert into TargetCat(targetId, catalog, autoschedule, aliases) values (172, 'spacecraft', 'No', 'MarsOdyssey');
+insert into Spacecraft(targetId, name,  xmit1FreqMhz, autoDetect, ephemFilename) values (172, 'MarsOdyssey', 8406.852, 'No', 'mars.xyz');
+
+insert into TargetCat(targetId, catalog, autoschedule, aliases) values (173, 'spacecraft', 'No', 'Kepler');
+insert into Spacecraft(targetId, name,  xmit1FreqMhz, autoDetect, ephemFilename) values (173, 'Kepler', 8424.506, 'Yes', 'kepler.xyz');
+
+insert into TargetCat(targetId, catalog, autoschedule, aliases) values (210, 'spacecraft', 'No', 'Zenith');
+insert into Spacecraft(targetId, name, autoDetect, ephemFilename) values (210, 'Zenith', 'No', '');

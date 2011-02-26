@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<web-app xmlns="http://java.sun.com/xml/ns/j2ee"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee 
+      http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd"
+    version="2.4">
+
+<!--
+  Copyright 2004 The Apache Software Foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+
+<!-- custom error pages
+    <error-page>
+        <error-code>404</error-code>
+        <location>/error404fileNotFound.jsp</location>
+    </error-page>   
+ -->
+
+    <!-- Define servlets that are included in the example application -->
+
+    <servlet>
+        <servlet-name>HelloUniverseExample</servlet-name>
+        <servlet-class>HelloUniverseExample</servlet-class>
+    </servlet>
+
+<!--
+    <servlet-mapping>
+        <servlet-name>HelloUniverseExample</servlet-name>
+        <url-pattern>/servlet<url-pattern>
+    </servlet-mapping>
+-->
+
+    <servlet> 
+       <servlet-name>spring-dispatch</servlet-name>
+        <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+       <load-on-startup>1</load-on-startup>
+    </servlet>
+
+    <servlet-mapping>
+       <servlet-name>spring-dispatch</servlet-name>
+        <url-pattern>*.ajax</url-pattern>
+    </servlet-mapping>
+
+     <servlet-mapping>
+        <servlet-name>spring-dispatch</servlet-name>
+        <url-pattern>/logs/*</url-pattern>
+    </servlet-mapping>
+
+     <servlet-mapping>
+        <servlet-name>spring-dispatch</servlet-name>
+        <url-pattern>/logs/ajax/follow*</url-pattern>
+    </servlet-mapping>
+
+    <security-constraint>
+      <display-name>Security Constraint</display-name>
+      <web-resource-collection>
+         <web-resource-name>Protected Area</web-resource-name>
+	 <!-- Define the context-relative URL(s) to be protected -->
+         <url-pattern>/protected/*</url-pattern>
+	 <!-- If you list http methods, only those methods are protected -->
+	 <http-method>DELETE</http-method>
+         <http-method>GET</http-method>
+         <http-method>POST</http-method>
+	 <http-method>PUT</http-method>
+      </web-resource-collection>
+      <auth-constraint>
+         <!-- Anyone with one of the listed roles may access this area -->
+         <role-name>tomcat</role-name>
+	 <role-name>role1</role-name>
+	 <role-name>observer</role-name>
+      </auth-constraint>
+
+<!-- enable secure authentication (ie, SSL) -->
+<!-- 
+       <user-data-constraint>
+           <transport-guarantee>CONFIDENTIAL</transport-guarantee>
+	</user-data-constraint>
+-->
+
+    </security-constraint>
+
+
+    <!-- Default login configuration uses form-based authentication -->
+
+    <login-config>
+      <auth-method>FORM</auth-method>
+      <realm-name>Example Form-Based Authentication Area</realm-name>
+      <form-login-config>
+        <form-login-page>/login.jsp</form-login-page>
+        <form-error-page>/loginError.jsp</form-error-page>
+      </form-login-config>
+    </login-config>
+
+<!--
+    <login-config>
+      <auth-method>BASIC</auth-method>
+    </login-config>
+-->
+
+    <!-- Security roles referenced by this web application -->
+    <security-role>
+      <role-name>role1</role-name>
+    </security-role>
+    <security-role>
+      <role-name>tomcat</role-name>
+    </security-role>
+    <security-role>
+      <role-name>observer</role-name>
+    </security-role>
+
+    <!-- Environment entry examples -->
+    <!--env-entry>
+      <env-entry-description>
+         The maximum number of tax exemptions allowed to be set.
+      </env-entry-description>
+      <env-entry-name>maxExemptions</env-entry-name>
+      <env-entry-value>15</env-entry-value>
+      <env-entry-type>java.lang.Integer</env-entry-type>
+    </env-entry-->
+    <env-entry>
+      <env-entry-name>minExemptions</env-entry-name>
+      <env-entry-value>1</env-entry-value>
+      <env-entry-type>java.lang.Integer</env-entry-type>
+    </env-entry>
+    <env-entry>
+      <env-entry-name>foo/name1</env-entry-name>
+      <env-entry-value>value1</env-entry-value>
+      <env-entry-type>java.lang.String</env-entry-type>
+    </env-entry>
+    <env-entry>
+      <env-entry-name>foo/bar/name2</env-entry-name>
+      <env-entry-value>true</env-entry-value>
+      <env-entry-type>java.lang.Boolean</env-entry-type>
+    </env-entry>
+    <env-entry>
+      <env-entry-name>name3</env-entry-name>
+      <env-entry-value>1</env-entry-value>
+      <env-entry-type>java.lang.Integer</env-entry-type>
+    </env-entry>
+    <env-entry>
+      <env-entry-name>foo/name4</env-entry-name>
+      <env-entry-value>10</env-entry-value>
+      <env-entry-type>java.lang.Integer</env-entry-type>
+    </env-entry>
+
+    <!-- session timeout in minutes -->
+    <session-config>
+       <session-timeout>600</session-timeout>
+    </session-config>
+
+</web-app>

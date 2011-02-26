@@ -1,0 +1,92 @@
+#!/bin/sh
+################################################################################
+#
+# File:    reconfig
+# Project: OpenSonATA
+# Authors: The OpenSonATA code is the result of many programmers
+#          over many years
+#
+# Copyright 2011 The SETI Institute
+#
+# OpenSonATA is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+# 
+# OpenSonATA is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with OpenSonATA.  If not, see<http://www.gnu.org/licenses/>.
+# 
+# Implementers of this code are requested to include the caption
+# "Licensed through SETI" with a link to setiQuest.org.
+# 
+# For alternate licensing arrangements, please contact
+# The SETI Institute at www.seti.org or setiquest.org. 
+#
+################################################################################
+
+
+# updates Makefile infrastructure
+
+# usage:
+
+# ./reconfig [--dxlibsonly] [--installdir <dir>]
+# --dxlibsonly : build only the dx libraries
+# --installdir <dir> :  configure <dir> as the installation directory
+
+defaultInstallDir="${HOME}/sonata_install"
+installDir=${defaultInstallDir}
+options=""
+
+# process command line args
+while [ "$1" ]
+do
+   if [ "$1" = "--dxlibsonly" ]
+   then
+
+      options="${options} --enable-dxlibsonly"
+
+   elif [ "$1" = "--installdir" ]
+   then
+
+      if [ "$2" = "" ]
+      then
+         echo "Must give install directory name"
+         exit
+      fi
+
+      installDir="$2"
+      options="${options} --prefix=${installDir}"
+      shift
+
+   else
+      options="${options} $1"
+   fi
+   shift
+done
+
+
+# reconfigure the package: 
+
+echo "libtoolize..."
+libtoolize --force --automake 
+
+echo "aclocal..."
+aclocal -I m4 
+
+echo "autoheader..."
+autoheader 
+
+echo "autoconf..."
+autoconf 
+
+echo "automake..."
+automake --add-missing --force-missing
+
+echo "configure..."
+./configure --enable-maintainer-mode ${options}
+

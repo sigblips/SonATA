@@ -1,0 +1,231 @@
+################################################################################
+#
+# File:    README.ephemeris
+# Project: OpenSonATA
+# Authors: The OpenSonATA code is the result of many programmers
+#          over many years
+#
+# Copyright 2011 The SETI Institute
+#
+# OpenSonATA is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+# 
+# OpenSonATA is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with OpenSonATA.  If not, see<http://www.gnu.org/licenses/>.
+# 
+# Implementers of this code are requested to include the caption
+# "Licensed through SETI" with a link to setiQuest.org.
+# 
+# For alternate licensing arrangements, please contact
+# The SETI Institute at www.seti.org or setiquest.org. 
+#
+################################################################################
+
+Generating ephemeris files for use by the SSE doppler library:
+
+The SSE doppler code requires an earth ephemeris file for all
+observations, and a spacecraft ephemeris file for observing
+spacecraft.   The FORTRAN program scephm, which is built
+using the JPL NAIF SPICE library will generate those files.
+
+scephm takes as input the JPL solar system and optional spacecraft
+SPK (spice kernal) ephemeris files in .bsp format, as well as a leap second
+kernel file (.tls format), and outputs ephemeris files in the ASCII ".xyz"
+format required by the SSE.
+
+Note that the solar system ephemeris kernel used for the 
+old observing system (the SCS) was DE200.  This appears to
+have been superseded by later kernels, most recently
+(apparently) DE405.  Comparison tests show that the two kernels
+appear to yield the same doppler parameters, although intermediate
+earth position calculations differ.
+Dreher June 2002:
+
+    How very odd.  The two ephemerides yield the same
+    values for the velocity and acceleration vectors
+    for the earth, but differ in the position vector
+    by several hundred kilometers (a large error for
+    a precision ephemeris).  Naively, this is not
+    what I would expect.  And the position difference
+    is not a simple rotation of the coordinate frame,
+    since the distance of the earth from the solar
+    system barycenter varies by a similar amount. It
+    may be in the fitting process, the constraints on the
+    velocity of the earth are stronger than those on the
+    position of the earth, so that the new coordinate
+    system differs from the older one largely as a fixed
+    offset in position of the barycenter?  I'll have
+    to ask around to learn more about this aspect of
+    the calculations.  Meanwhile, all the doppler
+    calculations seem to agree quite well (to about
+    0.001 Hz at 1 GHz) so the new ephemeris should work
+    OK, at least for stars.  The positional differences
+    will be more important when/if we try to observe
+    spacecraft that are much closer to earth than stars.
+
+
+Resources:
+
+Description of JPL Solar System Ephemeris
+http://www.gb.nrao.edu/~rfisher/Ephemerides/ephem_descr.html
+
+FTP site for NAIF (to find SPICE code and ephemeris kernels)
+<ftp://naif.jpl.nasa.gov/pub/naif/>
+
+specifically, earth ephemeris kernels can be found here:
+ftp://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/planets/
+
+
+NAIF explained at <http://pds.jpl.nasa.gov/NAIF.html>
+see also <http://www-sisn.jpl.nasa.gov/issue62/article_spice.html>
+
+HORIZONS on-line tool (can also be used to generate ephemeris spice kernels):
+http://ssd.jpl.nasa.gov/horizons.html
+
+
+
+Summary of commonly used NAIF Integer ID Codes
+===========================================================================
+ 
+        NAIF   Name
+        ID
+        ----   ------------------------
+         0     Solar system barycenter
+         1     Mercury          "
+         2     Venus            "
+         3     Earth            "
+         4     Mars             "
+         5     Jupiter          "
+         6     Saturn           "
+         7     Uranus           "
+         8     Neptune          "
+         9     Pluto            "
+        10     Sun              "
+ 
+        301     Moon
+ 
+     A planet is always considered to be the 99th satellite of its own
+     barycenter. For example, Jupiter is body number 599. 
+ 
+        199     Mercury
+        299     Venus
+        399     Earth
+        499     Mars
+        599     Jupiter
+        699     Saturn
+        799     Uranus
+        899     Neptune
+        999     Pluto
+ 
+ 	-6	Pioneer 6
+	-20	Pioneer 8
+	-23     Pioneer 10
+        -24	Pioneer 11
+        -12     Pioneer 12 (Venus orbiter)
+        -18     Magellan
+        -27     Viking 1 orbiter
+        -30     Viking 2 orbiter
+
+        -29     Stardust        
+        -31     Voyager 1
+        -32     Voyager 2
+        -55     Ulysses
+        -77     Galileo orbiter
+        -84     Phoenix Lander
+        -98     New Horizons
+        -140    Deep Impact
+        -203    Dawn	
+	-226	Rosetta
+
+
+====================================================
+New example use of scephm to generate an ephemeris for 
+Pioneer 10 (example created June 2002).
+
+$ ./scephm
+
+      Welcome to SCEPHM  $Revision: 1.11 $
+
+ This program uses NAIF S- and P-
+ Kernel (SPK) files and subroutines to compute the
+ state of a target body as seen from an observing
+ body at a number of epochs within a given time
+ interval. Modified by JWD for Project Phoenix.
+
+ This program should be run in the dir containing
+ the .bsp and .tls files used.
+
+ [values] are string defaults, <CR> to use
+ (values) are integer defaults, /<CR> to use
+
+
+ This program generates either a spacecraft or 
+ earth ephemeris file in Phoenix .xyz format.
+
+ Generate a (s)pacecraft or (e)arth ephemeris (s/e)?
+S
+ Generating spacecraft ephemeris.
+
+ Enter the name of a leapseconds file [current.tls]:
+
+
+ SPK file for planets is de200.bsp
+ spacecraft have their own SPK files
+     most include earth too
+ Enter the name of an SPK file [de200.bsp]:
+
+ additional SPK filename or <CR>
+pioneer10_x.bsp
+ additional SPK filename or <CR>
+
+ Observer: Using center of the earth (399)
+ TARGET
+ Use following for spacecraft
+   ID CODE    Spacecraft
+   -------    ----------
+      -6      Pioneer 6
+      -20     Pioneer 8
+      -23     Pioneer 10
+      -31     Voyager 1
+      -32     Voyager 2
+      -55     Ulysses
+      -24     Pioneer 11 (a goner)
+
+ Enter the NAIF ID for a target body:
+-23
+
+ Enter the beginning UTC time [1997 jan 1 0:0:0]:
+2002 APR 01 00:00:00.00
+
+ Enter the time [ET] step in sec (eg: 86400):
+86400
+
+
+ Enter the number of states to calculate (eg: 366):
+365
+ Enter the inertial reference frame [J2000]:
+J2000
+
+ Type of correction                              Type of state
+ -------------------------------------------------------------
+ 'LT+S'    Light-time and stellar aberration    Apparent state
+ 'LT'      Light-time only                      True state
+ 'NONE'    No correction                        Geometric state
+
+ Phoenix: Using LT for spacecraft
+
+ Using X output format for Phoenix
+
+ Enter the output filename [ephem.xyz]:
+p10-ephem.xyz
+ Results written to 
+ p10-ephem.xyz                                                                   
+$ 
+====================================================

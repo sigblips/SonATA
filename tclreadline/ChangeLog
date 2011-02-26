@@ -1,0 +1,44 @@
+
+2000-12-08  Johannes Zellner  <johannes@zellner.org>
+
+    * reordered Makefile.am so that it always includes
+    tclshrl.c,wishrl.c into the distribution.
+
+2000-12-08  Johannes Zellner  <johannes@zellner.org>
+
+    * reenabled wishrl and tclshrl via configure switches
+
+2000-11-19  Johannes Zellner  <johannes@zellner.org>
+
+    * configure.in: moved the tlib check before the libreadline check
+
+2000-09-20  Johannes Zellner <johannes@zellner.org>
+
+    * made tclreadline.h installing to ${prefix}/include
+
+2000-08-27  Johannes Zellner <johannes@zellner.org>
+
+    * added Mark to AUTHORS :)
+
+2000-08-27  Mark Patton <mpatton@jhu.edu>
+
+    * converted tclreadline::readline to be an object
+    command. This was the simplest way to fix the
+    Tcl_Obj mem leak.
+
+    * added the command readline text and readline update
+    that retrieve the current input and redraw it respecively.
+
+2000-07-27  Johannes Zellner <johannes@zellner.org>
+
+     * configure.in: changed a == to = in a sh test
+     (reported by "Daniel O'Connor" <darius@dons.net.au>)
+
+2000-07-03  Johannes Zellner <johannes@zellner.org>
+
+     * Makefile.am: included EXTRA_DIST so that it compiles from `dist'
+
+2000-07-01  Johannes Zellner <johannes@zellner.org>
+
+     * switched to automake
+     * small fix so that itcl config switches are correctly completed.

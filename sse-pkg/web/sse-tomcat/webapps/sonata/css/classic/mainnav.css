@@ -1,0 +1,66 @@
+/*******************************************************************************
+
+ File:    mainnav.css
+ Project: OpenSonATA
+ Authors: The OpenSonATA code is the result of many programmers
+          over many years
+
+ Copyright 2011 The SETI Institute
+
+ OpenSonATA is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+ 
+ OpenSonATA is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+ 
+ You should have received a copy of the GNU General Public License
+ along with OpenSonATA.  If not, see<http://www.gnu.org/licenses/>.
+ 
+ Implementers of this code are requested to include the caption
+ "Licensed through SETI" with a link to setiQuest.org.
+ 
+ For alternate licensing arrangements, please contact
+ The SETI Institute at www.seti.org or setiquest.org. 
+
+*******************************************************************************/
+
+#tabnav {
+    height: 20px;
+    margin: 0;
+    padding-left: 10px;
+    background: url( img/tab_bottom.gif ) repeat-x bottom;
+}
+
+#tabnav li {
+    margin: 0;
+    padding: 0;
+    display: inline;
+    list-style-type: none;
+}
+
+#tabnav a:link, #tabnav a:visited {
+    float: left;
+    background: #f3f3f3;
+    font-size: 12px;
+    line-height: 14px;
+    font-weight: bold;
+    padding: 2px 10px 2px 10px;
+    margin-right: 4px;
+    border: 1px solid #ccc;
+    text-decoration: none;
+    color: #666;
+}
+
+#tabnav a:link.active, #tabnav a:visited.active {
+    border-bottom: 1px solid #fff;
+    background: #fff;
+    color: #000;
+}
+
+#tabnav a:hover {
+    background: #fff;
+}

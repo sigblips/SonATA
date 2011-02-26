@@ -1,0 +1,241 @@
+#!/usr/bin/env ifctclsh
+################################################################################
+#
+# File:    ifc
+# Project: OpenSonATA
+# Authors: The OpenSonATA code is the result of many programmers
+#          over many years
+#
+# Copyright 2011 The SETI Institute
+#
+# OpenSonATA is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+# 
+# OpenSonATA is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with OpenSonATA.  If not, see<http://www.gnu.org/licenses/>.
+# 
+# Implementers of this code are requested to include the caption
+# "Licensed through SETI" with a link to setiQuest.org.
+# 
+# For alternate licensing arrangements, please contact
+# The SETI Institute at www.seti.org or setiquest.org. 
+#
+################################################################################
+
+
+# Original code created by L. R. McFarland 2003
+
+# NSS Ifc control.
+# Assumes the required Ifc and GPIB libraries
+# are built into the version of tclsh executed
+# on the first line of this script.
+
+
+# ----- command line arguments -----
+
+set configfile   "unknown config file"
+set help    0
+set host    localhost
+set port    8899; # default ifc main port
+set verbose 0
+set cmdline false
+
+set state flag
+
+foreach arg $argv {
+
+    switch -- $state {
+	flag {
+	    switch -glob -- $arg {
+		-cfg    {set state configfile}
+		-help   {set help 1}
+		-host   {set state host}
+		-port   {set state port}
+		-verbose {set verbose 1}
+		-cmdline {set cmdline true}
+		default {puts "$argv0: unknown flag $arg"; set help 1;}
+	    }
+	}
+	configfile {
+	    set configfile $arg
+	    set state flag
+	}
+	host {
+	    set host $arg
+	    set state flag
+	}
+	port {
+	    set port $arg
+	    set state flag
+	}
+    }
+}
+
+if {$help == 1} {
+    puts -nonewline "$argv0 -cfg <config filename> \[-host <name>\] "
+    puts "\[-port <int>\] \[-verbose\] \[-help\] \[-cmdline\] ";
+    puts "-cfg: specify configuration file"
+    puts "-host: host to connect to via socket (default: $host)"
+    puts "-port: port to connect to on host (default: $port)"
+    puts "-verbose: turn on verbose output"
+    puts "-help: give this message"
+    puts "-cmdline: use stdin/stdout instead of socket (for testing)"
+
+    exit 0
+
+}
+
+
+# ---------------------
+
+Ifc ifc; # create single instance
+
+# ----- ifc helper routines ----
+
+proc attn {left right} {
+    ifc attn $left $right;
+}
+
+proc gpib {on} {
+    ifc gpib $on;
+}
+
+proc help {} {
+    ifc help;
+}
+
+proc id {} {
+    ifc id;
+}
+
+proc off {} {
+    ifc off;
+}
+
+proc reset {} {
+    ifc reset;
+}
+
+proc simulate {on} {
+    ifc simulate $on;
+}
+
+proc status {} {
+    ifc status;
+}
+
+proc selftest {} {
+    ifc selftest;
+}
+
+proc tunelo3 {rfcSkyFreqMHz ifcSkyFreqMHz ifcTuneFreqMHz ifcOutFreqMHz amp} {
+    ifc tunelo3 $rfcSkyFreqMHz $ifcSkyFreqMHz $ifcTuneFreqMHz \
+        $ifcOutFreqMHz $amp
+}
+
+
+# ----- source configuration file -----
+
+if {[string length $configfile] > 0} {
+
+    if [catch {open $configfile r} configfileId] {
+	puts stderr "Error: $argv0 cannot open configuration file: $configfile"
+	exit -1
+    } else {
+	# make sure config file version matches what's expected
+	gets $configfileId line
+	close $configfileId
+ 	set expectedConfig "# ifc configuration version 3.0"
+	if [string compare $line $expectedConfig] {
+	    puts "Error: $argv0 incorrect configuration file format"
+            puts "Found: '$line'"
+            puts "Expected: '$expectedConfig'"
+	    exit -1
+	} else {
+	   if [catch {source $configfile} sourceError ] {
+		puts "Error: problem found in ifc config file $configfile"
+		global errorInfo
+	        regsub -all \[\r\n\] $errorInfo " " oneLineError
+		puts "Error: $oneLineError"
+
+	        exit -1
+           }
+	}
+    }
+}
+
+
+# use for local testing -- take command line input
+
+if {$cmdline} {
+
+ package require tclreadline
+
+ tclreadline::Loop
+
+}
+
+
+# ----- connect to a socket -----
+
+
+set line ""
+
+proc OpenSocket {host port} {
+    set channelId [socket $host $port]
+    fconfigure $channelId -buffering line
+    return $channelId
+}
+
+if [catch {set sock [OpenSocket $host $port]} sockerr] {
+    puts "Error: $argv0: seeker connection refused."
+    puts "Verify that the seeker has been started."
+    exit -1
+}
+
+# start command processing loop
+
+while {![eof $sock] && ![catch {gets $sock line} sockerr]} {
+
+    if {$verbose == 1} {
+        puts "Command: \[eval $line\]"
+    }
+
+    if {$sockerr == -1} {
+        if {$verbose == 1} {
+            puts "Error: $argv0 socket error $sockerr"
+            puts "Reconnecting ..."
+        }
+        if [catch {set sock [OpenSocket $host $port]} sockerr] {
+            puts "Reconnection refused. Exiting."
+            return
+        }
+    }
+
+    # process command here
+    if [catch {set result [eval $line]} errmsg] {
+        if {$verbose == 1} {
+            puts "Error TCL: $errmsg"
+        }
+        set SSE_IFC_ERROR_MSG_HEADER "Error"
+        puts $sock "$SSE_IFC_ERROR_MSG_HEADER: command '$line': $errmsg";
+        puts $sock "<end>";
+
+    } else {
+        if {$verbose == 1} {
+            puts "Result: $result"
+        }
+
+        puts $sock $result
+        puts $sock "<end>";
+
+    }
+
+}

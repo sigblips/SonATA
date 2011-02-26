@@ -1,0 +1,4 @@
+Main-Class: opensonata.dataDisplays.BaselineImage
+Class-Path: jfreechart-1.0.6.jar jcommon-1.0.10.jar
+
+

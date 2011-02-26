@@ -1,0 +1,11 @@
+# Least square, 2 channels, 3 foldings, 0% overlap
+Length=2
+Foldings=3
+Overlap=0
+# Coefficients
+ -1.8755341e-002
+  1.8700109e-001
+  4.0523520e-001
+  4.0523520e-001
+  1.8700109e-001
+ -1.8755341e-002

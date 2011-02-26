@@ -1,0 +1,10 @@
+#!/bin/sh
+
+# $Id: verifySourceCheckin,v 1.1.1.1 2006/08/02 05:27:43 kes Exp $
+
+# List all files that end in .h & .cpp,
+# and Makefile.am files,
+# that are not checked into cvs.
+# Also list all cvs files that have a status of "M, U, or C".
+
+cvs -n update 2>&1 | awk "/\.h$|\.cpp$|Makefile.am$|^[MUC] /"

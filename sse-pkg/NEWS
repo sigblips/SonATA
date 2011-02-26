@@ -1,0 +1,1140 @@
+SSE NEWS - Release information
+
+* 2009-11-24
+
+Added cygus x3 grid.
+Tagged sse-1.37.1 in prelude branch.
+
+Added zenith avoidance angle to scheduler.
+Tagged sse-1.37.0 in prelude branch.
+
+* 2009-11-20
+
+Altered the seeker beamformer calibration tasks so
+that they now use database lookup tables when determining
+beamformer integration times for a given observing frequency.
+
+* 2009-10-23
+
+Added scheduler option that periodically rotates among primary 
+target IDs so that each is preferred in turn.
+
+* 2009-10-21
+
+Added 'stopstratfail' scheduler parameter to control
+whether the scheduler continues on to the next strategy
+if the current one fails.
+
+* 2009-10-20
+
+Tagged sse-1.36.0
+
+* 2009-10-16
+
+Added auto retry for beamformer-related task (strategy) failures.
+Target merit factors are now a runtime, user selectable parameter.
+Added geosat band avoidance to scheduler.
+High and low priority observing catalogs can now be specified
+using parameters.
+
+* 2009-10-02
+
+Removed Antenna (site position) and AntennaLimits (hour angle)
+lookup tables.
+
+* 2009-09-25
+
+Made compatible with ace-5.7.1.
+Removed obsolete sse/PdmMulticastHandler class.
+
+* 2009-09-04
+
+Tagged sse-1.35.0
+
+- First sse tag using git repository.
+- Updated spacecraft .xyz files for another year.
+- Simplified use of target selection merit factors
+to maximize lower declination coverage for galactic center
+survey.
+- Updated expectedNssComponents.cfg.
+
+* 2009-07-17
+
+Tagged sse-1_34.
+
+Scheduler can now retry calibration activities on failure.
+Added sun avoidance angle check to calibrator selection
+in scheduler.
+Fixed potential race condition in activity termination.
+
+* 2009-07-10
+
+Tagged sse-1_33.
+
+Corrected and simplified updating of observed freqs for targets.
+
+* 2009-07-08
+
+Tagged sse-1_32.
+
+Added periodic commensal calibrator pointing during
+observing.  New SchedulerParameter columns were added
+to seeker database schema to support this.
+
+* 2009-07-06
+
+Tagged sse-1_31.
+Removed dependencies on SLA astronomy library.
+
+* 2009-06-17
+
+Tagged sse-1_30.
+
+* 2009-06-10
+
+Tagged sse-1_29.
+
+* 2009-06-02
+
+Tagged sse-1_28.  Code used for early galactic center observations
+on the ATA.
+
+* 2009-02-09
+
+Tagged sse-1_27
+
+Removed remaining reference to 'freelib' argp in sse/NssParameters.i
+
+* 2009-02-06
+
+Tagged sse-1_26
+
+'freelib' has been deprecated and is no longer built. 
+The seeker now uses CmdLineParser for argument parsing.
+
+* 2009-02-03
+
+Tagged sse-1_25. 
+
+Added headers and other small mods to support building
+with gcc4.3.3.  This tag includes some partially implemented
+code for automated calibrations.
+
+* 2009-01-21
+
+Tagged sse-1_24 prior to making scheduler changes to support
+automated calibrations, system tests, etc.
+
+* 2008-12-24
+
+Tagged sse-1_23 to pick up all changes since last release.
+
+* 2008-05-30
+
+Tagged sse-1_22.
+
+Prior to making major changes to ATA backend interface.
+
+* 2007-10-12
+
+Added new parameters to seeker and seeker.schema,
+mostly related to commensal observing:
+
+ActParameters: pointprimary, primarybeampos, primaryrahours,
+  primarydecdeg
+
+SchedulerParameters: observer, geosatavoid
+
+
+* 2007-10-10
+
+Tagged sse-1_21. 
+
+Picked up all changes since last release,
+including a new archive disk rotation scheme, data backups
+to tape, and starmap creation using the pp3, tex and
+ImageMagick programs.
+
+Build support:
+-  moved common CXXFLAGS def into configure.in
+
+Utility programs:
+New:
+- sse/findNearbyTargets
+- database/convertTychoSubsetToTargetCat.cpp
+- jseeker/BaselineImage
+- util/backup-db-by-date
+- util/backup-prelude-files-to-tape
+- util/backup-slave-db
+- util/check-tape-write-protect
+- util/clear-archive-disk
+- util/compare-dir-checksums
+- util/create-observing-data-images
+- util/create-observing-starmap
+- util/create-starmap
+- util/delete-old-backup-db-by-date-files
+- util/list-prelude-files-for-backup
+- util/rotate-archive-disks
+- util/run-nss-prog-under-cron
+- util/send-obs-info-to-webserver
+
+Changed:
+- jseeker/WaterfallDisplay: 
+     added -batch mode
+- simulators/scienceData/dumpNssBaselines.cpp:
+     added demarshall for baseline values
+
+sse/ActivityWrappers.cpp:
+- for OFFs, don't use zero drift reject or recent rfi match so that
+pdm signal reports get filled in as completely as possible
+
+seeker.schema:
+- add ts timestamp column to CwBadBands, PulseBadBands, BaselineStats 
+for consistency with other tables and to aid archiving by date
+- use the 'like' mechanism to copy table with indices included
+
+ifc:
+- can now run stx in single pol mode
+- interface version changed to 4.2
+
+misc:
+- setup: extended <ephem>.xyz files for another year: earth, mars,
+        rosetta, saturn, voyager1
+- new library routine: sseutil/CmdLineParser.cpp
+- web interface tweaks
+
+* 2007-09-20
+
+Tagged sonata1_demo (packet generator->channelizer->sse->dx).
+
+* 2007-04-30
+
+Tagged sse-1_20.
+
+* 2007-04-17
+
+Tagged sse-1_19, after sse-pdm interface change,
+for DRIFT_TOO_HIGH and secondaryPfaMargin.
+
+* 2007-04-16
+
+Tagged sse-1_18, prior to sse-pdm interface change.
+
+* 2007-04-10
+
+Added an ACE_Task to the ObserveActivityImp so that it can 
+run time-consuming methods in its own thread, freeing up the
+reactor to handle incoming messages.
+
+Telescope tuning status is not reliable, so disabled check.
+
+* 2007-03-30
+
+Activity now waits for tuning commands to be reflected in the
+antenna server status before proceeding, instead of 
+assuming that the commands take effect immediately.
+
+* 2007-03-29
+
+Tagged sse-1_17.
+
+* 2007-03-28
+
+The data product files in the sse_archive are now stored
+in a separate subdirectory for each activity, to allow
+for faster access via the web interface.
+E.g. $HOME/sse_archive/2007-03-28/act212/<data files for act 212>
+
+* 2007-03-27
+
+Tagged sse-1_16.
+
+Latest changes:
+
+Build support:
+- swig: different swig versions now handled automatically, including swig1.3.31
+- gcc: made some minor additional gcc4.1.1 compatibility changes
+- tcl: handles tcl version up to tcl8.4
+
+seeker.schema:
+- consolidated ifc[123]Status tables into single ifcStatus table
+- created new TscopeSubarrayStatus table
+- renamed longitudeRads & latitudeRads fields
+- removed obsolete ifcSkyFreq from ifc status table
+- added moonavoid angle param
+
+ATA telescope interface related changes:
+- changed to control antenna subarrays
+
+scheduler:
+- added moon avoidance angle 
+- in OFFs, pdms now look only for their own candidates
+  to avoid problems with overlapping pdms.
+- reordered off position order for better followups on single ant beams.
+  New order: east by time, east, north, south, west, any position available
+
+config files:
+- merged left & right ifAttnDbOffset tables into single file, 
+    changed format to use linear interpolation
+- expectedNssComponents.cfg:  added BeamToAtaSubarray association
+
+obs-summary-report:
+- many changes to make more information available in daily observing reports
+
+sse-pkg-build-test:
+- switched from using mailx to sendmail to avoid a problem with the 
+contents being attached as an 'attachment.exe' binary file.
+
+Web interface:
+- Many changes to support observing, including adding new queries,
+plotting of certain database queries, displaying Hat Creek's LMST, etc.
+
+Misc:
+
+- controlcomponents script has a new -tscopesim argument
+
+- The sse-debug (AKA "verbose") log is now set up as a series of
+four rotating logs, each of which will grow up to the user specified
+size.  The max log size is set in the SSE_DEBUG_LOG_MAX_FILESIZE_MEGABYTES
+environment variable, and defaults to 25 MBytes.
+
+- Added double-check locking optimization design pattern to prevent 
+initialization race condition of Singletons in the Followup and Scheduler
+classes.
+
+
+* 2006-11-08
+
+Tagged sse-1_15, prior to ATA telescope interface changes.
+
+* 2006-07-31
+
+Tagged sse-1_14.
+
+Removed class:: prefixes from ssePdmInterface.h file for
+compatibility with gcc4.1.1.
+This bumped up the interface version (even though functionally
+nothing has changed).
+
+* 2006-07-27
+
+Made minor changes for compatibility with gcc4.1.1, mostly eliminating
+class:: prefixes on method declarations, and adding virtual
+destructors where needed.
+
+* 2006-07-03
+
+Tagged sse-1_13.
+
+- Completed conversion to baseband IF.  Eliminated all code made
+  obsolete by this conversion.
+- GPIB device control: use commanded values when asked for status instead
+  of interrogating the devices, to avoid GPIB bus collisions across
+  processes
+- Added a 'quiet' command to the tsig interface that makes the 
+  test signal generators as radio quiet as possible, i.e., 
+  turn output off; set freq to device minimum;
+  set drift to zero hz/s; set output amplitude to device minimum.
+- tsig pulse devices can now be specified in the config file
+  as 'at33250', 'at4400', or 'internal' (ie, internal to the tone generator)
+- added convertGalGridToTargetCat program
+- added createHourAngleTable program: more closely matches ATA horizon model
+      (adjusts for atmospheric refraction; finer grained interpolation)
+- updated doppler/current.tls file for leap second on December 31, 2005
+- updated mars.xyz & voyager1.xyz position files
+- ata tscope interface changed to new format, for multiple beams & tunings
+- scheduler changes:
+    - added option that checks that all selected targets are visible,
+      and that there's enough time before setting to do a full data collection
+    - now attempts to restart failed activities up to a user-specified number
+	of times, with a user-specified pause between each attempt
+    - added mutex protection to ActivityStrategy status
+    - fixed wrapup command so that it works correctly on followups
+- Recent RFI mask elements can now be of variable width (i.e.,
+  no longer limited to 1KHz wide).  Also, all targets that fall under
+  the nominal target's FOV are excluded from the mask.  If the mask
+  exceeds the maximum size allowed by the pdm, then the mask is truncated
+  to that size, instead of not being sent at all, which was the former
+  behavior.
+- created MysqlQuery class to consolidate code for mysql access
+- simplified classes in Id.cpp, eliminating unused code
+- Activity: added more robust failure handling; extracted Timeout class;
+   converted to use multibeam tscope interface; mutex protected actUnit lists
+- Created OffPositions class, that selects OFF positions for multiple 
+  synthesized beams within a primary beam FOV
+- OrderedTargets:  handle primary target beam regions for multitarget
+  observations (ie, galactic survey)
+- ObsRange: eliminated use of new/delete to increase execution speed;
+	added unit tests to cover all lines of code in Range library
+- more experimental web interface work was done
+
+* 2006-01-20
+
+Tagged sse-1_12.
+
+- Many changes made to support multibeam observing on the ATA.
+- Support multiple simultaneous test signal generators.
+- Added support for baseband IF.
+- Added more activity failure & error handling.
+- Added prototype web interface using Tomcat.
+- Added support for automatic system startup & shutdown, with
+	access to the text interface using sockets.
+- Scheduler changes:
+  - tries to recover from activity failures (for a user-specified
+	 maximum number of times), sends email if it can't
+  - stop now correctly handles any pending followups
+  - added a 'repeat strategy N times' option
+  - many changes to support multibeam observing
+- Added controlcomponents script that is used to control startup & shutdown
+	of individual SSE components (pdms, etc), including automatic
+	restart on component failure.
+- Added FileSender and FileReceiver java programs that perform automatic 
+	forwarding of baseline and complex amplitude (waterfall) data for
+	 remote monitoring.
+- PdmArchiver: error handling added for case where pdm hangs, then reconnects
+- Added slalib (for galactic coordinate conversion)
+- Added gseToRaDec coordinate conversion program (for finding the ACE 
+	spacecraft position)
+- Added new observation operation: FORCE_ARCHIVING_AROUND_CENTER_TUNING,
+	 that sends fake secondary candidates to the pdm to force it to
+	 archive additional data
+- Added watchdog timers for 'data collection complete' and 'done sending 
+	cw coherent detection (ie, primary phase of signal detection 
+	finished)' activity steps
+- changed precision in signal reports from Hz to milliHz
+- misc refactorings to eliminate duplicate code
+
+* 2005-02-24
+
+Fixed a seeker bug that was sending an incorrect archiver port
+number to the pdms, causing them to fail to connect to the archiver.
+
+* 2005-02-11
+
+Added a new environment variable, SSE_INITRC, which can be used to
+override the default seeker startup file (i.e., ~/.sserc).
+
+* 2005-02-01
+
+- Removed obsolete RfBirdieList class, which has been superceded
+by the pdm receiver birdie mask.  
+- Recent RFI masks are once again being created, and are 
+now compatible with multitarget mode.
+- Created "multitarget" and "multitargetfollowup" activity types
+so that the desired followup type will be run in multitarget
+mode.
+
+* 2005-01-26.
+
+Tagged sse-1_11.
+
+Pick up latest changes, including:
+- scheduler can now reobserve completed targets, as needed.
+
+* 2005-01-12
+
+Assert macro now calls abort to force a core dump for
+aid in debugging.
+
+* 2005-01-11
+
+tagged sse-1_10
+
+Pick up all the changes since the last release.  The multibeam
+scheduler changes are not yet complete but at least seem to
+not be causing any trouble.
+
+* 2005-01-06
+
+Many more changes to support multi-beam observations,
+including the selection of multiple simultaneous targets.
+
+* 2004-11-30
+
+Removed remaining references to 'main' and 'remote' from
+the seeker program and seeker.schema.  Merged the "OneSite"
+activity and activityUnit code into their respective parent
+classes.
+
+* 2004-11-17
+
+Many changes to support multibeam (multitarget) observing:
+
+- Added star (target) parameters to the seeker ActParameters
+for six beams.
+
+- beam-to-telescope associations are now specified in the
+expectedNssComponents.cfg config file.
+
+- seeker activity looks up the target star associated with each 
+telescope/beam and uses that to point the telescope.
+
+Misc changes:
+
+- Added a check in the seeker that generates an error if the
+database timezone is not UTC, since the seeker activities assume
+that timestamps and date/time strings are equivalent, and in UTC.
+
+- Reworked the activity startup error handling so that it
+uses exceptions rather than boolean function status values.
+
+* 2004-11-09
+
+Split up & reconfigured seeker.data file:
+- old AO star catalog moved to its own file
+- site and spacecraft info moved to seeker.site-spacecraft.data
+- New all-sky survey catalog put in seeker.ata-allsky-starlist.data
+- star coordinates changed from radians to RA-hours and Dec-deg
+
+* 2004-10-21
+
+Added BaselineStats to database schema & code.
+
+* 2004-10-20
+
+Added BadBands to database schema & code.
+
+* 2004-09-27
+
+tagged sse-1_09
+
+tag setup/rcvrBirdieMask.tcl file
+
+* 2004-09-27
+
+tagged sse-1_08
+
+tag multibeam changes
+
+* 2004-09-27
+
+Changes made to support multibeam (secondary) processing:
+
+General:
+- sse forwards secondary candidates to the pdms,
+and classifies the original candidates based on the 
+secondary candidate results
+- archive requests wait until all secondary
+candidate results are evaluated
+
+ssePdmInterface changed:
+- removed PdmMode field
+- removed references to 'MAIN' and 'REMOTE' from signal
+class reasons
+- used the term 'secondary' for signal class reasons,
+thresholds, etc. where required
+- added receiver birdie mask 
+- added rcvrSkyFreq to PdmActivityParameters
+- removed DopplerParameters
+
+database schema changed:
+- enums changed to text fields to avoid duplicated code
+(daddResolution, pol, sigClass, reason, res)
+- signal class reason field now uses 'brief'
+strings rather than the full-length ones
+- added containsBadBands field
+- removed pdm mode field 
+
+Misc:
+- sse sends a receiver birdie mask to the pdm instead of
+merging the receiver birdies into the recent RFI mask
+
+* 2004-09-27
+
+tagged sse-1_07
+(prior to sse-pdm-interface change)
+
+* 2004-07-30
+
+Changed telescope interface from radians to degrees/hours.
+
+* 2004-07-28
+
+tagged sse-1_06
+
+ssePdmInterface changed:
+- Changed bad band limits parameter units to counts per KHz.
+- Added max counts for cw paths, pulses, and pulse triplets
+  to bad band reports (ie, max allowed by limit settings)
+- Added multibeam Cw & Pulse train threshold parameters.
+
+* 2004-07-19
+
+tagged sse-1_05
+
+* 2004-07-19
+
+Added Bad Band reports to ssePdmInterface, plus misc. other
+small interface changes.
+
+* 2004-07-19
+
+tagged sse-1_04 (prior to ssePdmInterface change)
+
+* 2004-07-02
+
+Added multitarget mode for multibeam (parallel) pdm tuning 
+
+* 2004-06-21
+
+tsig (test sig control) can now specify the pulse gen source
+as either the testlo internal pulse generator, or an external
+at33250 signal generator.
+
+* 2004-06-16
+
+tagged sse-1_03.
+
+* 2004-06-02
+
+Added control of third IF chain (ifc3).
+
+* 2004-05-14
+
+tagged sse-1_02.
+
+The seeker, ifc, and testsig program swig wrapper files have been
+modified so that they now build with swig1.3.21 (upgraded from swig1.1).  
+Note that the swig generator has changed the way that it wraps global 
+C++ objects: they now are treated as regular tcl variables and must
+be dereferenced before they can be used.  For instance, in the seeker, 
+the command 'act show' would have to be specified as "$act show".  
+In order to hide this dereference, small tcl wrapper procedures have
+been added to the sse-pkg/util/seekerlib.tcl file for each of the
+objects in the seeker UI.  As a consequence, users must now source the
+seekerlib.tcl file before the seeker can be used (normally this
+is done in the user's ~/.sserc startup file).
+
+* 2004-05-13
+
+tagged sse-1_01.  Made template & namespace tweaks for compatibility
+with gcc3.4.0.
+
+* 2004-05-10
+
+tagged sse-1_00.
+
+Changed top level automake & autoconf related files (including
+reconfig) to match more recent versions of those build tools.
+On Solaris we're currently building against libtool 1.5.6,
+automake 1.8.4, and autoconf 2.59.
+
+Moved references to the various libraries (eg, SSEUTIL_DIR)
+from the subdirectory Makefiles up into the top level configure.in file
+to avoid duplication.
+
+The --with-stlport configuration option is operational once again,
+and is known to build correctly with STLport-4.6.2.
+
+The multiple classes for the Scheduler and Strategy were condensed into
+two classes, Scheduler and ActivityStrategy. The Scheduler is no longer
+a separate thread; the ActivityStrategy is a separate thread. A status
+member, strategyComplete_, was added to the ActivityStrategy so that
+the Scheduler can delete the completed strategy objects.
+
+Turned Followup class into a Singleton and removed its subclasses to
+simplify the implementation.
+
+The GPIBInterfaceLib/Scu.h interface was simplified and consolidated.
+
+Approximate antenna information for the ATA was added to the database
+schema and the seeker.
+
+The sse-pkg/ifc code was cleaned up and refactored, as was the
+sse-pkg/tsig code.
+
+A MysqlResultSet class was added that automatically frees the
+result set regardless of whether an error occurs.
+
+Added another parameter to the scheduler called
+'followupmode', which takes values of 'auto' & 'user'.
+The scheduler uses this to decide whether to do automated 
+followups when running in 'pdmtune = user' mode,
+ie, for doing automated on/off & grid sequences which
+the user initiates. 
+
+Activity Ids are no longer skipped when changing stars.
+
+TunePdms now processes pdm frequency assignments correctly around
+bandwidths removed by the permanent rfi mask.
+
+Added grid activities that do North, South, etc grid pointings,
+and a 'grid' user command that initiates them.
+
+Added 'archive disk full' error & warning limits.  The scheduler
+stops if the error limit is exceeded.
+
+Added beamsize & primaryfov to tscope params; removed unused params;
+changed default tscope to ATA; changed default tune freq to 1420Mhz
+
+Added AtaControlSim program, mostly written by Gerry Harp.
+
+In the WaterfallDisplay program, took out incorrect division by 2 in
+normalization to get proper noise level.
+
+Misc refactorings:
+- class renamings to match naming conventions.
+- separating interface from implementation.
+
+Added error handling for file open failure of baseline & compamp data files
+
+Added bandwidth of smallest pdm as a separate argument to ChooseTarget;
+removed defined constant
+
+ssecommutil/ComponentProxy.cpp:fixed null termination bug (off end of array);
+moved send & receive methods to TclProxy; used TclProxyInternal struct to
+hide implementation details; put receive buffer on heap rather than stack
+
+sse-pkg/lib subdirectory was eliminated.
+
+
+* 2004-04-01
+
+Rewrote telescope parsing & control code to match ATA control interface.
+
+* 2004-03-23
+
+Version in use at Arecibo at the end of the Spring 2004
+observing run.
+
+tagged sse-0_62.
+
+
+* 2004-02-24
+
+Version currently in use at Arecibo.
+tagged sse-0_61.
+
+* 2004-02-04
+
+tagged sse-0_60.
+
+Version in preparation for Spring 2004 observing run in
+Arecibo.  Changes included:
+
+- The seeker now has signal handling disabled.  It's hoped that this has been
+the source of the occasional seeker lockups we've been seeing.
+- Replacement for strcmp in ifc, tsig programs.
+- New earth & mars ephemeris files.
+- Candidate lookup prior to start time calculation for followups to avoid
+missed start time.
+- Easier manual followups (automated pdm tuning from previous activity).
+- Finer-grained use of mutexs in PdmArchiverProxy.cpp to prevent deadlocks.
+- Better message handling in the TclProxys (partial messages are no
+longer ignored).
+- New sse-watcher script, which uses the 'screen' program to monitor
+the seeker.
+
+* 2003-12-18
+
+tagged sse-0_59.  Version in use at the end of the Fall 2003 observing run in
+Arecibo.
+
+* 2003-12-05
+
+tagged sse-0_58.  Version currently in use at Arecibo.
+
+* 2003-11-19.  
+
+tagged sse-0_57.  Version currently in use at Arecibo.
+
+* 2003-11-12. 
+
+tagged sse-0_56.  Pick up latest changes.
+
+* 2003-10-30. 
+
+tagged sse-0_55.  Pick up latest changes.
+
+* 2003-10-27
+
+tagged sse-0_54.  Version in use right before shipping 
+equipment for Fall 2003 Arecibo deployment.
+
+* 2003-10-22
+
+tagged sse-0_53.
+
+* Added code for pulse signal reclassifications, refactoring
+& consolidating the existing cw power & cw coherent code.
+- More database/seeker.schema tweaks & cleanup.
+- Reworked tsig control
+- Tweaked ifc & tsig status in interface
+- misc other code cleanup
+
+* 2003-10-14
+
+tagged sse-0_52.
+
+Made a number of changes to the database/seeker.schema file
+and corresponding seeker code in order to:
+- match the ssePdmInterface changes
+- accommodate two IF chains.
+- record the activity and telescope parameters
+
+* removed most of the obsolete two-site code.
+
+* 2003-10-02
+
+tagged sse-0_51.
+
+sse-pdm interface changes made:
+- Moved baseline statistics request & limits check controls
+to PdmScienceDataRequest.
+- added pdm FREQ_INVERSION ops bit.   A 'freqinvert'
+UI activity parameter was added to control when it is applied.
+- Altered some fields in the DetectionStatistics struct.
+
+* 2003-10-01
+
+- Telescope control is now used to tune the receiver RF.
+- The format of the telescope immediate commands in the
+seeker UI was made more consistent with the other 
+component commands.
+- rfc related code and parameters were disabled and/or deleted.
+
+* tagged sse-0_50.  2003-09-30.
+
+sse-pdm interface changes made:
+- added structs & enums:
+    BaselineLimits
+    DetectionStatistics
+    BaselineStatus
+    BaselineLimitsExceededDetails
+- seeker ui parameters & database adjusted to match interface changes
+- added new pdm activity status states for baseline initial accum
+- added pol to Pulse report
+- renamed unlikelyhoood to pfa
+- deleted BadBandReport struct
+- misc other small interface changes
+
+* tagged sse-0_49. 2003-09-23
+
+Tagged latest code.
+
+* 2003-09-16
+
+Added new UI parameters for controlling activity timeouts:
+act sigdetwait - signal detection watchdog timer wait factor
+act readytimeout - component ready watchdog timeout period
+
+Added new watchdog timers for 'pdmTuned' and 'activityComplete'
+messages from pdms, that allow the activity to continue
+working even if some of the pdms fail.
+
+* tagged sse-0_48.  2003-09-02
+
+"Field test chassis" control code added.  Pulse gen is
+used to modulate AT4400 Test LO ext2 port to create 
+test pulses.
+
+* 2003-08-12
+Removed shared library versions of libfree and libsse to
+reduce link/runtime dependencies.
+
+* tagged sse-0_47.  2003-07-30.
+
+Changed the stored activity Id file format from memory-mapped
+to ASCII.
+
+* tagged sse-0_46.  2003-07-29.
+
+2003-07-28.  Reworked rfc, ifc, and tsig programs so that they
+now use static rather than shared libraries for GPIB 
+device control code.  This solves several problems:
+- Core dumps will no longer occur when exceptions are
+thrown in the GPIB libraries when using gcc3.3 (bugzilla bug#40).
+- The SSE_INSTALL env variable is no longer needed.
+- There is no longer a need to put /usr/local/NI_GPIB_ENET
+on your LD_LIBRARY_PATH.
+
+* tagged sse-0_45.  2003-07-15.
+
+Pick up latest changes.
+
+* tagged sse-0_44.  2003-07-10.
+
+Pick up latest 2-if chain changes.
+
+* tagged sse-0_43.  2003-07-08.
+
+allow pulse detection to be enabled via UI parameter.
+
+* tagged sse-0_42.  2003-06-27.
+
+* Began adding support to control 2 independent IF chains.
+
+* It turns out it is sometimes necessary to link against the -lz (zlib) 
+compression library, depending on how the mysql library was built.  It also
+appears that we can avoid the 'core dump on exception' problem on
+solaris if we link against zlib version 1.1.4 rather than zlib 1.1.3. 
+I've therefore restored the '-lz' option in sse/Makefile.am
+and database/Reports/Makefile.am.
+
+* The seeker, when built with gcc3.3 and ace5.3 on solaris, often
+core dumps with a 'pure virtual method called' error, immediately
+after an activity completes.  The problem appears to be due to a race
+condition that occurs when the SchedulerStrategyImpl object is
+deleted.  I've experimented with disabling the delete, and it seems to
+temporarily fix the problem (at the cost of a memory leak).  I've
+checked in this change for short term use until a more permanent fix
+is found.
+
+* tagged sse-0_41.  2003-06-02.
+Pick up all the gcc3.3 compatibility changes.
+
+* Changes were made throughout the package for compatibility
+with gcc 3.3.  All modifications should be backwardly
+compatible with gcc 2.95.  However, building the full sse-pkg
+against gcc3.3 does require ACE library version 5.3 (or later).
+
+Highlights of the changes:
+
+- Const value initializations in class definitions were changed to
+use "=" rather than "()".
+
+- Text following #endif macros was changed to a comment.
+
+- The keyword 'class' was added to friend declarations as needed.
+
+- The ACE_ROOT definition was taken out of the subdirectory Makefile.am files
+and instead defined in the toplevel configure.in file.
+
+- 'typedef typename' definitions were added as needed to
+avoid 'implicit typename' warnings.
+
+- The seekerTclLib.h file was removed from sse-pkg/sse, due
+to multiline strings no longer being supported.  Instead, the
+seeker tcl routines defined there (and which were thereby automatically
+built into the seeker's tcl interpreter) were moved to util/seekerlib.tcl
+to make them available for use in a user's .sserc seeker startup file.
+
+- To prevent the pdmsim, pdmarchiver, and tscope programs from segfaulting
+when they exit, the ACE event handlers are now created on the heap
+rather than the stack.  (This is an issue regarding the lifespan of event 
+handlers registered with the ACE reactor, when the latter shuts down).
+
+- _ANSI_C_ was defined in the GPIBInterfaceLib/GPIBDevice.h file so that the
+appropriate prototypes in the ugpib.h where used.
+
+- -lstdc++ was added to GPIBInterfaceLib/Makefile.am.  This was required
+in order to prevent runtime "symbol not found" errors in the various
+tcl interpreters.
+
+- Linking against the -lz library resulted in a core dump in the seeker
+when exceptions were thrown (at least on Solaris).  The cause is not
+immediately apparent.  The -lz references were removed from the Makefile.am
+files since they are (apparently) not needed.
+
+
+* tagged sse-0_40.  2003-05-22
+Obsolete TSS data products are no longer generated.
+This tag includes all checked in code.
+
+* Followup activities do not tune extra PDMs
+
+* stopstrategy command added
+There is a new command stopstrategy which allows current activities to
+complete, but stops the current strategy, so that no further
+activities are started.
+
+* tagged sse-0_39.  Includes all code checked in by 2003-04-26,
+which was used in the last night of observing at Arecibo for the 
+Spring 2003 run.  Actual tag date was 2003-05-01.
+
+* database updated
+Activities.validObservation defaults to "No".  validObservations has
+been added to ActivityUnits, with default of "No".  mainStxStatus and
+remoteStxStatus have been added to Activities table.
+
+
+* Pdms are sorted for two site observing
+PDMs are sorted so that PDMs containing DADDs are first, forcing DADD
+main PDMs to be paired with DADD remote PDMs, if both exist.  PDMs are
+sorted alphabetically, and in predictable order.
+
+* scheduler does not move to new star until current star's observations are complete.
+
+* scheduler should not switch star when current star can be observed
+
+* tagged sse-0_38. 2003-04-02. Pick up latest code changes.
+Note however: the latest available ssePdmInterface.h & sseInterface.h file
+changes are *not* included, since they were modified unexpectedly,
+and will cause an incompatibility with the latest available pdm release.
+
+* tagged sse-0_37. 2003-03-18.  Final lab test version before shipping
+equipment to the field.
+
+* tagged sse-0_36. 2003-03-15.
+
+* almost complete avoid RFI mask
+The autoscheduler now observes none of the RFI mask, except for a
+small overlap at the lower end of an observation, slightly more than
+0.1 MHz.
+
+* tagged sse-0_35. 2003-03-12. pick up all changes since last release.
+
+* database schema changed.
+
+* reconfig command line arguments passed to configure
+
+* configure.in: configure now allows "--without-stlport" option.
+
+* PDM frequencies are no longer repeated.
+
+* tagged sse-0_34. 2003-01-30.  Set up sse-pkg for thread-safe compilations.
+Added -pthreads (solaris) and -pthread (linux) gcc flag to configure.in.
+Made the package compatible with the thread-safe stlport library, which 
+mostly involved adding references to the std namespace.
+
+* Add TssMask, which allows automatic scheduling to avoid observing stars which were completed with the TSS.
+
+* tagged sse-0_33. 2002-12-06. preserve current sse version prior to update.
+
+* tagged sse-0_32. 2002-12-05. preserve current sse version prior to update.
+
+* tagged sse-0_31. 2002-12-01. version used for last nights observing
+
+* failure of star lookup now causes strategy to stop.
+
+* remove permanent RFI mask from observed frequencies
+
+* tagged sse-0_30. 2002-11-24
+
+* tagged sse-0_29. 2002-11-07
+
+* send follow up signals to pdm
+
+* auto target works with pipelining turned on.
+
+* added 'watchdogs' act parameter that enables/disables use
+  of the component watchdog timers, mainly to assist testing
+
+* tagged sse-0_28. 2002-10-25
+
+* put mutex's on all PdmProxy methods
+
+* fixed remote pdm archiver bug.  Now the correct remote archiver
+host is sent to the remote pdms.
+
+* tagged sse-0_27. 2002-10-22
+
+* seeker.schema change.
+Duplicate columns deleted.  setistarnum changed to starid in starcat.
+
+* dbActivityId and seekerActivityId have been merged to form activityId.
+
+* added getid and setid, which gets and sets next activity id.
+
+* tagged sse-0_26. 2002-10-10
+
+fixed typo in jseeker/Makefile.am that disabled .jar files from being
+installed, which prevented the java programs from running
+
+* tagged sse-0_25. 2002-10-08
+
+* tagged sse-0_24. 2002-09-23
+
+* tagged sse-0_23. 2002-09-19
+
+* moving target (spacecraft) position computed from ephemeris files
+
+* time-average complex amplitude plot added to waterfallDisplay 
+  (accessed via the View menu)
+
+* runsse now starts the ifc server on ifc1 & ifc2
+
+* tagged sse-0_22. 2002-09-16
+
+* pdm data archiver now writes each pol into a separate file
+* dumpNssBaselines now handles variable length records
+
+* tagged sse-0_21. 2002-09-12
+
+* only compute doppler for two site activities with a target
+
+* save variable length baseline data; fixed baselineDisplay freq readout
+
+* tagged sse-0_20. 2002-09-11
+
+* tagged sse-0_19. 2002-09-10
+
+* made stop somewhat more robust (stop is now ignored if the
+ activity is already wrapping up).
+
+* tagged sse-0_18. 2002-09-09
+
+* tagged sse-0_17. 2002-08-26
+
+* added added TwoSiteIfTestZeroDrift; changed default doppler param values
+
+* parameters with empty string can now be read and written correctly.
+
+* tagged sse-0_16. 2002-08-12
+
+* added ssePdmArchiverInterface (no change to ssePdmInterface)
+
+* tagged sse-0_15. 2002-08-08
+
+* changed ssePdmInterface: altered archive messaging
+
+* tagged sse-0_14. 2002-07-12
+
+* increased MAX_NSS_MESSAGE_STRING size to 512 in sseInterface.h
+
+* tagged sse-0_13.   2002-07-10
+
+* ssePdmInterface changed:
+    Added CwCoherentSegment & FollowUpSignal structs & code.
+    Reordered pdm signal class reasons by class and pdm/sse assignment.
+    Shortened 'frequency' fields to 'freq'.
+
+* tagged sse-0_12.   2002-07-03
+
+* changed default install directory to $HOME/sse_install
+
+* tagged sse-0_11.  2002-06-19
+
+* increased print precision to milliHz for signal reports
+
+* tagged sse-0_10.  2002-06-17
+
+* changed ssePdmInterface: reworked signal classifications; added
+    follow-up candidate messages
+
+* tagged: sse-0_09.  2002-06-17
+  Prior to sse-pdm interface changes.
+
+* tagged: sse-0_08.  2002-05-30
+
+* changed isoDateTime to UTC
+
+* tagged: sse-0_07.  2002-05-08
+
+* added configuration option to only build the libraries required
+  by the pdm.  To use:  ./reconfig --enable-pdmlibsonly
+
+* tagged: sse-0_06
+
+* archive complex amplitudes now stored in one file per signal
+
+* added runssedd script that starts up left & right pol waterfall
+& baseline displays
+
+* tagged: sse-0_05
+
+* changed sse-pdm interface:  added new-style archiving messages
+and removed the obsolete ones
+
+* added PdmTuned struct to sse-pdm interface that reports
+actual pdm tune freq and data collection length.
+
+* pdm overlap is now set
+The overlap between the center frequency of two successive pdm is now
+determined using a fixed value, independent of center frequency.
+
+* pdmround parameter added to scheduler
+range option for scheduler now rounds using pdmround parameter.
+
+* Multiple starts do not cause core dump
+Multiple starts now work.  Pipelined strategies now worked better.

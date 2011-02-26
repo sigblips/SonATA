@@ -1,0 +1,186 @@
+12/7/00
+
+CD Data: when a half-frame of data has been received by the
+	host from the spectrum analysis, two things must be done: (1)
+	the requested set of data must be written to the SSE to provide
+	the complex amplitudes, and (2) the data must be buffered in
+	host memory in preparation for writing to disk.
+
+PdmSseCDTask: this task sends a half-frame of CD data to the SSE;
+	the number of subbands is specified by the SSE during activity
+	definition and 
+
+1/2/01
+
+SSE-PDM communication: when the PDM starts, it must broadcast to
+	the SSE its revision information.  This is done by a datagram
+	(UDP) packet which indicates the Revision # of the software, and
+	is called HereIAm.  If the SSE does not respond, the message
+	will be repeated periodically until a response is received.
+	The response contains the IP address and port # of the SSE
+	communication handler.  The information should be used to
+	open a stream (TCP) socket to the SSE, which is then used for
+	all further communication.
+
+	A pair of tasks handles communication with the SSE, one for
+	input and the other for output.  Each has a pointer to the
+	TCP connection (which may or may not be open).  If the
+	connection is lost, the input task will request a new
+	connection from the broadcast task.
+
+5/15/01
+
+Buffer layout computation
+
+***************************
+* The following is not well thought out
+***************************
+DSP CD buffers
+		int32_t subbandsPerSpectrum;// # of subbands in a spectrum
+		int32_t subbandsPerBuf;		// # of subbands in each buffer
+		int32_t binsPerSubband;		// # of bins in each subband
+		float64_t bytesPerBin;		// # of bytes in each bin
+		int32_t spectraPerBuf;		// # of spectra in each buffer
+
+	typical values for CD
+		subbandsPerSpectrum = 2048
+		subbandsPerBuf = 256
+		binsPerSubband = 1
+		spectraPerSubband = 512
+		bytesPerBin = 1.0
+
+	typical values for CWD at 1Hz
+		subbandsPerSpectrum = 2048
+		subbandsPerBuf = 256
+		binsPerSubband = 1024
+		spectraPerSubband = 1
+		bytesPerBin = 0.25
+
+	typical values for CWD at 2Hz
+		subbandsPerSpectrum = 1024
+		subbandsPerBuf = 128
+		binsPerSubband = 2048
+		spectraPerSubband = 1
+		bytesPerBin = 0.25
+
+	typical values for CWD at 4Hz
+		subbandsPerSpectrum = 512
+		subbandsPerBuf = 64
+		binsPerSubband = 4096
+		spectraPerSubband = 1
+		bytesPerBin = 0.25
+
+
+	float64_t bytesPerBin;
+	int32_t binsPerSubband;
+	int32_t subbandsPerSpectrum;
+	int32_t spectraPerHalfFrame;
+	int32_t halfFramesPerBuffer;
+
+	int32_t bytesPerBuffer;
+
+	CD DSP buffering
+		bytesPerBin = 1.0;
+		binsPerSubband = 1;
+		subbandsPerSpectrum = 2048;
+		spectraPerHalfFrame = 512;
+		bytesPerBuffer = 128 * 1024;
+	
+		binsPerSpectrum = binsPerSubband * subbandsPerSpectrum = 1 * 2048
+				= 2048;
+		bytesPerSubband = bytesPerBin * binsPerSubband = 1.0 * 1 = 1;
+		binsPerSubbandHalfFrame = binsPerSubband * spectraPerHalfFrame
+				= 1 * 512 = 512;
+		bytesPerSubbandHalfFrame = bytesPerBin * binsPerSubbandHalfFrame
+				= 1.0 * 512 = 512;
+		subbandHalfFramesPerBuffer = bytesPerBuffer /  bytesPerSubbandHalfFrame
+				= (128 * 1024) / (1 * 512) = 256;
+		
+		bytesPerHalfFrame = bytesPerBin * binsPerSpectrum * spectraPerHalfFrame;
+		spectraPerBuffer = spectraPerHalfFrame * halfFramesPerBuffer;
+//		buffersPerHalfFrame = bytesPerHalfFrame / bytesPerBuffer;
+		subbandsPerBuffer = subbandsPerSpectrum / buffersPerHalfFrame;
+
+		blkLen = bytesPerSubband;
+		blks = subbandHalfFramesPerBuffer;
+		dspStride = bytesPerSubband;
+
+	CD Host buffering
+		bytesPerBin = 1.0;
+		binsPerSubband = 1;
+		subbandsPerSpectrum = 4096;
+		spectraPerHalfFrame = 512;
+		bytesPerBuffer = 16 * 1024 * 1024;
+		binsPerSpectrum = binsPerSubband * subbandsPerSpectrum
+				= 1 * 4096 = 4096;
+			
+		binsPerSubbandHalfFrame = binsPerSubband * spectraPerHalfFrame
+				= 1 * 512 = 512;
+		bytesPerSubbandHalfFrame = bytesPerBin * binsPerSubbandHalfFrame
+				= 512;
+
+		bytesPerHalfFrame = bytesPerBin * binsPerSpectrum * spectraPerHalfFrame
+				= 1.0 * 4096 * 512 = 2MB
+		halfFramesPerBuffer = bytesPerBuffer / bytesPerHalfFrame
+				= 16MB / 2MB = 8;
+		bytesPerSubbandBuffer = bytesPerSubbandHalfFrame * halfFramesPerBuffer
+				= 512 * 8 = 4096;
+
+		blkLen = bytesPerSubband = 512;
+		hostStride = bytesPerSubbandBuffer = 4096;
+		halfFrameOffset = bytesPerSubbandHalfFrame = 512;
+
+	CWD 1Hz DSP buffering
+		int32_t binsPerSlice;
+
+		bytesPerBin = 0.25;
+		binsPerSubband = 1024;
+		subbandsPerSpectrum = 2048;
+		spectraPerHalfFrame = 1;
+		binsPerSlice = 32768;
+		bytesPerBuffer = 64 * 1024;
+
+		int32_t subbandsPerSlice, binsPerSpectrum, bytesPerSlice;
+
+		binsPerSpectrum = binsPerSubband * subbandsPerSpectrum;
+		subbandsPerSlice = binsPerSlice / binsPerSubband;
+		bytesPerSlice = bytesPerBin * binsPerSlice;
+		slicesPerBuffer = bytesPerBuffer / bytesPerSlice;
+		slicesPerSpectrum = binsPerSpectrum / binsPerSlice;
+
+		slicesPerHalfFrame = slicesPerSpectrum * spectraPerHalfFrame;
+
+		buffersPerHalfFrame = slicesPerHalfFrame / slicesPerBuffer;
+
+		blkLen = bytesPerSlice;
+		blks = slicesPerBuffer;
+		dspStride = bytesPerSlice;
+
+	CWD 1Hz Host buffering
+		bytesPerBin = 0.25;
+		binsPerSubband = 1024;
+		binsPerSlice = 32768;
+		subbandsPerSpectrum = 4096;
+		spectraPerHalfFrame = 1;
+		bytesPerBuffer = 8 * 1024 * 1024;
+		binsPerSpectrum = binsPerSubband * subbandsPerSpectrum
+				= 1024 * 4096 = 4MB;
+
+		subbandsPerSlice = binsPerSlice / binsPerSubband = 32768 / 1024 = 32;
+		binsPerSubbandHalfFrame = binsPerSubband * spectraPerHalfFrame
+				= 1024 * 1 = 1024;
+		bytesPerSubbandHalfFrame = bytesPerBin * binsPerSubbandHalfFrame
+				= 0.25 * 1024 = 256;
+
+		blkLen = bytesPerSlice;
+		hostStride = bytesPerSliceBuffer = bytesPerSlice * slicesPerBuffer;
+		halfFrameOffset = bytesPerSlice;
+
+5/16/01
+
+We may be able to use the pdmDiskIORequest structure to perform the
+DSP->host buffer transfers, but it should probably be renamed to
+pdmFileIORequest to avoid the implication of a physical disk drive.
+
+It may also be possible to do transmission to the DSP board using the
+same structure.

@@ -1,0 +1,13 @@
+Makefile
+Makefile.in
+createAllskyStarcat
+createRaDecRegionTargetCat
+createGalSurveyTargetCat
+createGalSurveyGridOutline
+createEclipticSurveyTargetCat
+convertTychoToTargetCat
+convertGalGridToTargetCat
+convertSimbadToTargetCat
+convertReconsToTargetCat
+createHourAngleTable
+targetgrid

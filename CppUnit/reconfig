@@ -1,0 +1,24 @@
+#!/bin/sh
+
+# updates Makefile infrastructure
+
+
+echo "libtoolize..."
+libtoolize --force --automake 
+
+echo "aclocal..."
+aclocal
+
+echo "autoconf..."
+autoconf
+
+echo "autoheader..."
+autoheader
+
+echo "automake..."
+automake -a
+
+# creating shared libs makes the example programs abort
+# so disable them
+./configure --disable-shared --enable-maintainer-mode $*
+

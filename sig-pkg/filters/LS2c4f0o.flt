@@ -1,0 +1,13 @@
+# Least square, 2 channels, 4 foldings, 0% overlap (.9x bin)
+Length=2
+Foldings=4
+Overlap=0
+# Coefficients
+ -8.5139208e-002
+ -5.1693568e-002
+  1.7665749e-001
+  4.1829555e-001
+  4.1829555e-001
+  1.7665749e-001
+ -5.1693568e-002
+ -8.5139208e-002

@@ -1,0 +1,2 @@
+Main-Class: opensonata.dataDisplays.PermRFIMaskGen
+Class-Path: mysql-connector-java-2.0.14-bin.jar

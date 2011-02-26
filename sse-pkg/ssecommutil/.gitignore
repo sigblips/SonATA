@@ -1,0 +1,10 @@
+Makefile
+Makefile.in
+TestTextUI
+TestUserCmdHandler
+testUnit
+testRotatingFileLogger
+coordToDecimal
+dopplerShift
+angularSep
+beamgrid

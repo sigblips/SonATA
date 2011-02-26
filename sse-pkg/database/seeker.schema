@@ -1,0 +1,951 @@
+################################################################################
+#
+# File:    seeker.schema
+# Project: OpenSonATA
+# Authors: The OpenSonATA code is the result of many programmers
+#          over many years
+#
+# Copyright 2011 The SETI Institute
+#
+# OpenSonATA is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+# 
+# OpenSonATA is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with OpenSonATA.  If not, see<http://www.gnu.org/licenses/>.
+# 
+# Implementers of this code are requested to include the caption
+# "Licensed through SETI" with a link to setiQuest.org.
+# 
+# For alternate licensing arrangements, please contact
+# The SETI Institute at www.seti.org or setiquest.org. 
+#
+################################################################################
+
+-- ------------------------------------------------------------
+-- MySQL Database schema for seeker
+-- seeker.schema
+-- ------------------------------------------------------------
+
+-- -----------------------------------------------------------------------
+-- database schema version
+-- -----------------------------------------------------------------------
+
+drop table if exists SeekerDbVersion;
+
+create table SeekerDbVersion
+(
+  ts		timestamp not null,
+  revision	text
+);
+
+insert into SeekerDbVersion (revision) values('2009-10-22');
+
+-- -----------------------------------------------------------------------
+-- Target Catalog
+-- -----------------------------------------------------------------------
+
+drop table if exists TargetCat;
+
+create table TargetCat
+(
+  targetId      int not null primary key,
+  catalog       enum("none", "spacecraft", "habcat", "nearest", "exoplanets",
+                "galsurvey", "tycho2subset", "tycho2remainder",
+                "caldelay", "calphase", "radecgrid", "cygnusx3", "antisolar",
+		"quietsky") not null,
+  ra2000Hours   double not null default -99, 
+  dec2000Deg    double not null default -99, 
+  pmRaMasYr     double not null default 0,  -- proper motion, RA, milliArcsec per yr
+  pmDecMasYr    double not null default 0,  -- proper motion, Dec, milliArcsec per yr 
+  parallaxMas   double not null default 0.01,  -- parallax, milliArcsec 
+  spectralType  varchar(16) not null default "", 
+  bMag          double not null default -99,  -- blue filter (apparent) magnitude
+  vMag          double not null default -99,  -- visual filter (apparent) magnitude
+  aliases       tinytext not null ,   -- catalog numbers, star names, etc
+  primaryTargetId int not null default -1,
+  autoSchedule  enum("No", "Yes") not null,
+
+  KEY (catalog),
+  KEY (ra2000Hours),
+  KEY (dec2000Deg)
+);
+
+-- -----------------------------------------------------------------------
+-- Spacecraft
+-- -----------------------------------------------------------------------
+
+drop table if exists Spacecraft;
+
+create table Spacecraft
+(
+  targetId            int not null primary key,  -- same as in TargetCat
+  name                tinytext not null, 
+  xmit1FreqMhz        double not null default 0,
+  xmit2FreqMhz        double not null default 0,
+  autoDetect          enum("No", "Yes") not null,
+  ephemFilename       text not null 
+);       
+
+
+-- -----------------------------------------------------------------------
+-- Calibration Target Fluxes
+-- -----------------------------------------------------------------------
+
+drop table if exists CalTargetFlux;
+
+create table CalTargetFlux
+(
+  targetId      int not null default 0,  -- same id as in TargetCat
+  alias         tinytext not null, 
+  freqMhz       double not null default 0,
+  fluxJy        double not null default 0
+);       
+
+-- -----------------------------------------------------------------------
+-- BF Calibration Integration Times
+-- -----------------------------------------------------------------------
+
+drop table if exists BfCalPhaseTime;
+
+create table BfCalPhaseTime
+(
+  lowFreqMhz    double not null default 0,       
+  highFreqMhz   double not null default 0,
+  fluxJy        double not null default 0,
+  timeSecs      double not null default 0
+);       
+
+drop table if exists BfCalDelayTime;
+create table BfCalDelayTime like BfCalPhaseTime;
+
+-- -----------------------------------------------------------------------
+-- Activity information:
+-- parameters, statistics, etc.
+-- Note that the parameters for all components involved in the activity
+-- can be accessed via pointers to the relevant tables.
+-- -----------------------------------------------------------------------
+
+drop table if exists Activities;
+
+create table Activities
+(
+  id                           int unsigned auto_increment not null primary key,
+  ts			       timestamp not null,
+  startOfDataCollection        datetime,
+  length                       int,  -- obs length sec
+  type                         text,
+
+  actParametersId              int,
+  ifc1ParametersId             int,
+  ifc2ParametersId             int,
+  ifc3ParametersId             int,
+  dxParametersId              int,
+  schedParametersId            int,
+  tsig1ParametersId             int,
+  tsig2ParametersId             int,
+  tsig3ParametersId             int,
+  tscopeParametersId           int,
+
+  validObservation             enum("No", "Yes") not null,
+
+  tuningaSkyFreqMhz	       double,
+  tuningbSkyFreqMhz	       double,
+  tuningcSkyFreqMhz	       double,
+  tuningdSkyFreqMhz	       double,
+
+  minDxSkyFreqMhz             double,
+  maxDxSkyFreqMhz	       double,
+
+  -- from ObsSummaryStats.h
+  passCwCohDetCandidates       int,
+  confirmedCwCandidates        int,
+  confirmedPulseCandidates     int,
+  allCwCandidates              int,
+  allPulseCandidates           int,
+  cwSignals                int,
+  pulseSignals             int,
+  testSignals              int,
+  zeroDriftSignals         int,
+  recentRfiDatabaseMatches int,
+  unknownSignals           int,
+
+  comments                     text not null,
+  KEY (startOfDataCollection)
+    
+);
+
+-- -----------------------------------------------------------------------
+-- Activity Parameters
+-- -----------------------------------------------------------------------
+
+drop table if exists ActParameters;
+
+create table ActParameters
+(
+  id		int unsigned auto_increment not null primary key,
+  ts		timestamp not null,
+  candarch	text,
+  comparedxs	enum("on", "off") not null,
+  cwcohdonetimeoutfactor double, -- timeout for end of primary detect phase
+  datacolltimeoutoffset int, -- data collect complete timeout offset in secs
+  delay         int, -- sec
+  diskfullerror double, -- % disk full error limit
+  diskfullwarn  double, -- % disk full warning limit
+  dut		double,
+  earthephem    text,
+  emailactstat  text,
+  emailaddr	text,
+  freqinvert	text,
+  multitargetnulls enum("on", "off") not null,
+  offactnulls   text,
+  nulldepth     double, -- expected null beam effectiveness in dB
+  pointprimary  enum("on", "off") not null,
+  primarybeampos enum("targetid", "coords") not null,
+  primaryrahours double,  -- primary beam pointing coords j2000 RA
+  primarydecdeg double, -- primary beam pointing coords j2000 Dec
+  prevactid     int,
+  readytimeout  int,
+  rfiagelimit   double,  -- recent rfi age limit in days
+  sigdetwait    int,
+  site		text,
+  targetprimary	int, -- target number at primary FOV center
+  targetbeam1   int, -- target number for beam N
+  targetbeam2   int,
+  targetbeam3   int,
+  targetbeam4   int,
+  targetbeam5   int,
+  targetbeam6   int,
+  tscopetimeout int,
+  type          text,
+  varerror      text,
+  varerrorlower double,
+  varerrorupper double,
+  varwarn       text,
+  varwarnlower  double,
+  varwarnupper  double,
+  watchdogs     text
+
+) ENGINE=MyISAM;
+
+
+-- -----------------------------------------------------------------------
+-- ActivityUnit (activity submodule that controls a dx)
+-- -----------------------------------------------------------------------
+
+drop table if exists ActivityUnits;
+
+create table ActivityUnits
+(
+  id 				int unsigned not null auto_increment primary key,
+  ts 			        timestamp not null,
+  startOfDataCollection		datetime not null,
+  activityId			int default null,
+  dxActivityParametersId	int default null,
+  dxIntrinsicsId 		int default null,
+  dxNumber			int default -1,
+  dxTuneFreq			double default 0,  -- MHz, center, requested 
+  dxTuneFreqActual		double default 0,  -- MHz, center, returned by DX
+  dxLowFreqMhz 		double default 0, -- dx left edge freq
+  dxHighFreqMhz 		double default 0, -- dx right edge freq
+  targetId			int default -1,
+  primaryTargetId		int default -1,
+  beamNumber			int default -1,
+  validObservation              enum("No", "Yes") not null,
+
+  -- from ObsSummaryStats.h
+
+  passCwCohDetCandidates	int,
+  confirmedCwCandidates        	int,
+  confirmedPulseCandidates     	int,
+  allCwCandidates              	int,
+  allPulseCandidates           	int,
+  cwSignals                	int,
+  pulseSignals             	int,
+  testSignals              	int,
+  zeroDriftSignals         	int,
+  recentRfiDatabaseMatches 	int,
+  unknownSignals           	int,
+
+  comments			text not null,
+
+  key 				(activityId),
+  key	 			(targetId)
+) ENGINE=MyISAM;
+
+-- -----------------------------------------------------------------------  
+-- Scheduler parameters
+-- MySQL analog of sse/SchedulerParameters.cpp, 
+-- SchedulerParametersInternal
+-- -----------------------------------------------------------------------
+
+drop table if exists SchedulerParameters;
+
+create table SchedulerParameters
+(
+  id 			int unsigned auto_increment not null primary key,
+  ts			timestamp not null,
+  beam1			enum("on", "off") not null,
+  beam2			enum("on", "off") not null,
+  beam3			enum("on", "off") not null,
+  beam4			enum("on", "off") not null,
+  beam5			enum("on", "off") not null,
+  beam6			enum("on", "off") not null,
+  rftune		enum("auto", "user") not null,
+  dxtune		enum("user", "range", "forever") not null,
+  multitarget		enum("on", "off") not null,
+  target		enum("user", "semiauto", "auto", "autorise", "commensal") not null,
+  targetwait		enum("on", "off") not null,
+  pipe			enum("on", "off") not null,
+  beginfreq		double default null,  -- MHz
+  endfreq		double default null,  -- MHz
+  mindxbw		double default null,  -- min % total dx bandwidth
+  mintargetsep		double default null,  -- beamsizes
+  dxround		double default null,  -- MHz
+  dxoverlap 		double default null,  -- MHz
+  dxtunetol		double default null,  -- MHz
+  followup		enum("off", "on") not null,
+  followupmode		enum("auto", "user") not null,
+  minfollowups		int, -- number of reserved followup obs
+  repeatstrat		int not null,  -- repeat strategy N times
+  maxfailures		int not null,  -- max number of act failures allowed
+  restartpause		int not null,  -- pause in secs between act restarts
+  tscopemaxfailures     int not null,  -- max number of tscope ready failures allowed
+  tscopereadypause	int not null,  -- pause in secs between tscope ready act restarts
+  inputbw		double default null, -- MHz
+  maxdistly		double default null, -- max target dist light years
+  sunavoid		double default null, -- sun avoidance angle degrees
+  moonavoid		double default null, -- moon avoidance angle degrees
+  geosatavoid		double default null, -- geosat band dec avoid angle deg
+  zenithavoid		double default null, -- zenith avoid angle deg
+  autorisecutoff	double default null, -- autorise target cutoff minutes
+  declowerlimit		double default null, -- degrees
+  decupperlimit		double default null, -- degrees
+  emailaddr		text, -- email address to notify on strategy failure
+  emailstratfail 	enum("off", "on") not null, -- enable strategy failure email
+  stopstratfail 	enum("off", "on") not null, -- stop on strategy failure
+  checktargets		enum("off", "warn", "on") not null,
+  targetavailactsetup   int, -- act setup time (secs), for target avail check
+  beambandwidth		double, -- beam input bandwidth MHz
+  primaryidcutoff       int, -- min targets with shared primary target id
+  catshighmaxcounts     int, -- high priority catalog max counts cutoff
+  catshigh              text, -- comma separated list of high priority catalogs
+  catslow               text, -- comma separated list of low priority catalogs
+  comcal		enum("on", "off") not null, -- commensal calibration
+  comcalinterval	double default null,  -- minutes
+  comcallength          double default null,  -- minutes
+  rotateids		enum("on", "off") not null, -- primary ids rotation
+  rotateidsinterval	double default null,  -- minutes
+  tasks	       	        text, -- comma separated list of tasks to run
+  targetmerit        	text -- comma separated list of target merits to use
+
+) ENGINE=MyISAM;
+  
+-- -----------------------------------------------------------------------
+-- IfcParameters --
+-- MySQL analog of sse/IfcParameters.cpp
+-- note: ifc table names start with lowercase to match ui ifc commands
+-- -----------------------------------------------------------------------
+drop table if exists ifc1Parameters;
+
+create table ifc1Parameters
+(
+  id          int unsigned auto_increment not null primary key,
+  ts          timestamp not null,
+  attnctrl    enum("user", "auto") not null,
+  attnl       int, -- attn left
+  attnr       int, -- attn right
+  ifsource    text, -- test | sky
+  hlen        int,  -- histogram length
+  varl        double, -- variance left
+  varr        double, -- variance right
+  vartol      double  -- variance tolerance
+);
+
+drop table if exists ifc2Parameters;
+create table ifc2Parameters like ifc1Parameters;
+
+drop table if exists ifc3Parameters;
+create table ifc3Parameters like ifc1Parameters;
+
+-- -----------------------------------------------------------------------
+-- Ifc Status
+-- -----------------------------------------------------------------------
+
+drop table if exists ifcStatus;
+
+create table ifcStatus
+(
+  id          	int unsigned auto_increment not null primary key,
+  ts          	timestamp not null,
+  ifc           enum("ifc1", "ifc2", "ifc3") not null,    
+  actId	        int,
+  attnL		int,	
+  attnR		int,
+  stxMeanL      double,
+  stxMeanR	double,
+  stxVarL	double,
+  stxVarR	double,
+  stxStatus 	int,
+  KEY(actId)
+);
+
+-- -----------------------------------------------------------------------
+-- tsigParameters (test signal control)
+-- -----------------------------------------------------------------------
+
+-- MySQL analog of sse/TestSigParameters.cpp
+
+drop table if exists tsig1Parameters;
+
+create table tsig1Parameters
+(
+  id            int unsigned auto_increment not null primary key,
+  ts            timestamp not null,
+
+  gen           enum("on", "off") not null,
+  enable        enum("on", "off") not null,
+  sigtype       text,    -- cw | pulse
+  freq          double,  -- MHz
+  freqtol       double,  -- MHz
+  cwamp		double,  -- dBm
+  drift         double,  -- Hz/s
+  drifttol      double,  -- Hz/s
+  sweeptime     double,  -- sec
+  width         double,  -- Hz
+  widthtol      double,  -- Hz
+  pulseamp      double,  -- Volts
+  pulseper      double,  -- sec
+  pulsewidth    double,  -- sec
+  pol           text not null,
+  checksig      enum("on", "off") not null,
+  checkfreq     enum("on", "off") not null,
+  checkdrift    enum("on", "off") not null,
+  checkwidth    enum("on", "off") not null
+
+);
+
+drop table if exists tsig2Parameters;
+create table tsig2Parameters like tsig1Parameters;
+
+drop table if exists tsig3Parameters;
+create table tsig3Parameters like tsig1Parameters;
+
+-- -----------------------------------------------------------------------
+-- Tscope Parameters
+-- -----------------------------------------------------------------------
+drop table if exists TscopeParameters;
+
+create table TscopeParameters
+(
+  id		int unsigned auto_increment not null primary key,
+  ts		timestamp not null,
+  antlistsource text, -- where ants are specified (params|antgroups)
+  antsmaxsefd   int, -- max SEFD used when autoselecting ants
+  antsprimary   text, -- primary beam antlist
+  antsxpol      text, -- xpol antlist
+  antsypol      text, -- ypol antlist
+  beamsize	double,	 -- synth beamsize in arcsec @ 1GHZ
+  caltype       text,    -- calibration type: delay|phase|freq
+  caltime       int,  -- calibration integration time
+  calcycles     int,  -- number of calibration cycles  
+  centertuneoffset  double,  -- MHz (diff between prelude & dac band centers)
+  primaryfov    double,  -- primary beamsize in deg
+  sitelat       double, -- site latitude north degrees      
+  sitelong      double, -- site longitude west degrees      
+  sitehoriz     double, -- site horizon degrees      
+  sitename      text, -- site name
+  tuninga       double,  -- ata tuning 'A' skyfreq in MHz     
+  tuningb       double,  -- ata tuning 'B' skyfreq in MHz     
+  tuningc       double,  -- ata tuning 'C' skyfreq in MHz     
+  tuningd       double,  -- ata tuning 'D' skyfreq in MHz     
+  tuneoffset    double,  -- MHz (baseband tune offset)
+  caliterations int(11) default 0
+
+) ENGINE=MyISAM;
+
+
+
+-- -----------------------------------------------------------------------
+-- Tscope Pointing Request
+-- -----------------------------------------------------------------------
+drop table if exists TscopePointReq;
+
+create table TscopePointReq
+(
+  id		int unsigned auto_increment not null primary key,
+  ts		timestamp not null,
+  actId		int,
+  beamNumber	int default -1,  -- prelude beam number associated with the atabeam
+  ataBeam	text,  -- ata beam name ('beamxxx')
+  coordType	text,  -- requested coord type (AZEL, J2000, GALACTIC)
+  azDeg         double default 0,
+  elDeg         double default 0,
+  raHours       double default 0,
+  decDeg        double default 0,
+  galLongDeg    double default 0,
+  galLatDeg     double default 0,
+
+  KEY(actId)
+) ENGINE=MyISAM;
+
+-- -----------------------------------------------------------------------
+-- Tscope Beam Status
+-- -----------------------------------------------------------------------
+
+-- copy of TscopePointReq, minus the beamNumber column:
+
+drop table if exists TscopeBeamStatus;
+create table TscopeBeamStatus like TscopePointReq;
+alter table TscopeBeamStatus drop column beamNumber;
+
+-- -----------------------------------------------------------------------
+-- Tscope Subarray Status
+-- -----------------------------------------------------------------------
+
+drop table if exists TscopeSubarrayStatus;
+
+-- tscope subarray status at start of observation
+
+create table TscopeSubarrayStatus
+(
+  id		int unsigned auto_increment not null primary key,
+  ts		timestamp not null,
+  actId		int,
+  ataBeam	text not null,  -- associated ata beam name ('beamxxx') 
+  numTotal      int,  -- total number of ants in subarray
+  numSharedPointing int,  -- number of ants sharing primary pointing
+  numTrack      int, 
+  numSlew       int,
+  numStop       int,
+  numOffline    int,
+  numDriveError int,  -- number of ants reporting drive errors
+  zfocusMhz     double,
+  gcErrorDeg    double,
+  wrap          int,
+  KEY(actId)
+
+) ENGINE=MyISAM;
+
+
+-- -----------------------------------------------------------------------
+-- DxIntrinsics
+-- MySQL analog of include/sseDxInterface.h, DxIntrinsics
+-- -----------------------------------------------------------------------
+
+drop table if exists DxIntrinsics;
+
+create table DxIntrinsics
+(
+  id int unsigned not null auto_increment primary key,
+  ts timestamp not null,
+  interfaceVersionNumber	text,
+  hzPerSubChannel		double default null,
+  maxSubChannels 		int default null,
+  serialNumber			int default null,
+  dxHostName 			text,
+  dxCodeVersion			text,
+  birdieMaskDate 		datetime,
+  permMaskDate			datetime,
+
+  unique key dxintrinsics_unique (interfaceVersionNumber(100), hzPerSubChannel, maxSubChannels, serialNumber, dxHostName(100), dxCodeVersion(100), birdieMaskDate, permMaskDate)
+) ENGINE=MyISAM;
+
+-- -----------------------------------------------------------------------
+-- DxParameters
+-- MySQL analog of sse/DxParameters.cpp
+-- -----------------------------------------------------------------------
+drop table if exists DxParameters;
+
+create table DxParameters
+(
+  id                        int unsigned auto_increment not null primary key,
+  ts                        timestamp not null,
+  length                    int,
+  maxcand                   int,
+  clustfreqtol              double,
+  zerodrifttol              double,
+  maxdrifttol	            double,
+
+  -- CW --
+  cwclustdeltafreq          int,
+  badbandcwpathlim          double,
+  daddres                   int,  -- resolution: 1 | 2 | 4, etc. in Hz
+  daddthresh                double,
+  cwthresh	            double,
+  secondarycwthresh         double,
+  secondarypfamargin        double,
+  coherentdetlim            double,
+
+  -- Pulse --
+  pulseclustdeltafreq       int,
+  badbandpulsetriplim       double,
+  badbandpulselim           double,
+  trainsignifthresh         double,
+  secondarytrainsignifthresh double,
+  maxpulsesperhf	    int,  -- maxPulsesPerHalfFrame
+  maxpulsespersubperhf	    int,  -- maxPulsesPerSubChannelsPerHalfFrame 
+
+  pulsedetect	            enum("on", "off") not null,
+  pulsethresh               double,
+  tripletthresh             double,
+  singletthresh             double,
+  basesubave                int,    -- baselineSubChannelsAverage
+  baseinitaccum             int,    -- baselineInitialAccumulationHalfFrames
+  basedecay		    double, -- baselineDecay factor
+
+  basestats	            enum("on", "off") not null,
+  basewarn	            enum("on", "off") not null,
+  baseerror		    enum("on", "off") not null,	
+
+  basewarnmeanupper	    double,
+  basewarnmeanlower	    double,
+  basewarnstddev	    double,
+  basewarnrange	            double,
+
+  baseerrormeanupper	    double,
+  baseerrormeanlower	    double,
+  baseerrorstddev	    double,
+  baseerrorrange            double,
+
+  baselines                 enum("on", "off") not null, -- sendBaselines
+  baserep                   int,    -- baselineReportingHalfFrames
+  compamps                  enum("on", "off") not null, -- sendComplexAmplitudes
+  datareqtype               text, -- dataRequestType
+  datareqsubchan            int,
+  datareqfreq               double,
+  manualbw                  enum("on", "off") not null,
+  bandwidth                 int,
+
+  recentrfienable           enum("on", "off") not null,
+  recentrfimaskelemwidmin   double,
+  recentrfimasksizemax      double		
+);
+
+-- -----------------------------------------------------------------------
+-- DxActivityParameters 
+-- MySQL analog of include/sseDxInterface.h, DxActivityParameters
+-- -----------------------------------------------------------------------
+drop table if exists DxActivityParameters;
+
+create table DxActivityParameters
+(
+  id                         int unsigned auto_increment not null primary key,
+  ts                         timestamp not null,
+
+  dataCollectionLength       int,  	-- sec
+  rcvrSkyFrequency           double,	-- MHz
+  ifcSkyFrequency            double,	-- MHz
+  dxSkyFrequency            double,	-- MHz
+  channelNumber	             int,	
+  operations                 int,	-- bit mask
+  sensitivityRatio           double,	
+  maxNumberOfCandidates      int,
+  clusteringFreqTolerance    double,	-- Hz
+  zeroDriftTolerance         double,	-- Hz/s
+
+   -- CW --
+  badBandCwPathLimit         double,
+  cwClusteringDeltaFreq      int,	-- bins
+  daddResolution             text, 	-- "1 Hz", "2 Hz", etc. in Hz
+  daddThreshold              double,	-- sigma
+  cwCoherentThreshold        double,	-- sigma
+  secondaryCwCoherentThreshold        double,  -- sigma
+  limitsForCoherentDetection double,
+
+  -- Pulse
+  badBandPulseTripletLimit   double,
+  badBandPulseLimit          double,
+  pulseClusteringDeltaFreq   int,
+  pulseTrainSignifThresh     double,
+  secondaryPulseTrainSignifThresh     double,
+
+  maxPulsesPerHalfFrame int,
+  maxPulsesPerSubChannelPerHalfFrame int,
+
+  -- TBD requestPulseResolution[MAX_RESOLUTIONS] bool(?)
+  -- TBD PulseParameters pd[MAX_RESOLUTIONS] (?)
+
+  dxScienceDataRequestId   	int,
+  baselineSubChannelAverage     	int,
+  baselineInitAccumHalfFrames 	int,
+  baselineDecay			double,
+
+  baselineWarningLimitsId    	int,
+  baselineErrorLimitsId    	int,
+
+  key (dxSkyFrequency)
+
+);
+
+-- -----------------------------------------------------------------------
+-- Baseline[Warning/Error]Limits 
+-- -----------------------------------------------------------------------
+drop table if exists BaselineWarningLimits;
+
+create table BaselineWarningLimits
+(
+  id             	int unsigned auto_increment not null primary key,
+  ts             	timestamp not null,
+  meanUpperBound	double,
+  meanLowerBound	double,	
+  stdDevPercent		double,
+  maxRange		double
+);
+
+drop table if exists BaselineErrorLimits;
+create table BaselineErrorLimits like BaselineWarningLimits;
+
+-- -----------------------------------------------------------------------
+-- DxScienceDataRequest
+-- -----------------------------------------------------------------------
+drop table if exists DxScienceDataRequest;
+
+create table DxScienceDataRequest
+(
+  id                          int unsigned auto_increment not null primary key,
+  ts                          timestamp not null,
+
+  sendBaselines               enum("on", "off") not null,
+  sendBaselineStatistics      enum("on", "off") not null,
+  checkBaselineWarningLimits  enum("on", "off") not null,
+  checkBaselineErrorLimits    enum("on", "off") not null,
+  baselineReportingHalfFrames int,
+  sendComplexAmplitudes       enum("on", "off") not null,
+  requestType                 enum("freq", "subchan") not null,
+  subchan                     int,
+  rfFrequency                 double
+
+);
+
+-- -----------------------------------------------------------------------
+-- Detection Statistics
+-- -----------------------------------------------------------------------
+
+drop table if exists DetectionStats;
+
+create table DetectionStats
+(
+  id            	int unsigned auto_increment not null primary key,
+  ts            	timestamp not null,
+  actId	        	int,
+  actUnitId     	int,
+  dxNumber		int,
+  totalCandidates	int,  
+  cwCandidates		int,     
+  pulseCandidates	int,  
+  candidatesOverMax	int,
+  totalSignals		int,   
+  cwSignals		int,	  
+  pulseSignals		int,	  
+  leftCwHits		int,      
+  rightCwHits		int,     
+  leftCwClusters	int,  
+  rightCwClusters	int, 
+  totalPulses		int,     
+  leftPulses		int,      
+  rightPulses		int,     
+  triplets		int,        
+  pulseTrains		int,    
+  pulseClusters		int
+
+);
+
+-- -----------------------------------------------------------------------
+-- CandidateSignals
+-- MySQL analog of include/sseDxInterface.h, SignalDescription
+-- -----------------------------------------------------------------------
+
+drop table if exists CandidateSignals;
+
+create table CandidateSignals
+(
+  -- common information for all signal types --
+
+  id                int unsigned auto_increment not null primary key,
+  ts                timestamp not null,
+  dbActivityUnitId  int,
+  location          text,
+  targetId          int default -1,
+  beamNumber	    int default -1,
+  type              enum("CwC", "CwP", "Pul") not null,
+
+  -- SignalPath --  
+  rfFreq            double, -- MHz
+  drift             double, -- Hz/s
+  width             double, -- Hz
+  power             double,
+  pol               text not null,
+  sigClass          text not null,
+  reason 	    text not null,
+  subchanNumber     int,
+  containsBadBands  enum("No", "Yes")  not null default "No",
+
+  -- signal id --
+  dxNumber         int,
+  activityId        int,
+  activityStartTime datetime,
+  signalIdNumber    int,
+
+  -- original signal id --
+  origDxNumber         int,
+  origActivityId 	int,
+  origActivityStartTime datetime,
+  origSignalIdNumber    int,
+
+  -- CW Coherent Signal and Pulse Signal types add the Confirmation Stats:
+  pfa               double,
+  snr               double,
+
+  -- CW Coherent Signal adds segment count
+  nSegments	    int,
+
+  -- Pulse Signal Header adds the Pulse Train Description
+  pulsePeriod       double,
+  numberOfPulses    int,
+  res               text not null -- resolution
+
+);
+alter table CandidateSignals add index actIdIndex (activityId);
+alter table CandidateSignals add index rfFreqIndex (rfFreq);
+
+-- -----------------------------------------------------------------------
+-- Signals 
+-- -----------------------------------------------------------------------
+
+drop table if exists Signals;
+create table Signals like CandidateSignals;
+
+-- additional indexes to speed up recent rfi mask related queries:
+alter table Signals add index startTimeIndex (activityStartTime);
+alter table Signals add index targetIdIndex (targetId);
+
+-- -----------------------------------------------------------------------
+-- Coherent Segments Description  --
+-- -----------------------------------------------------------------------
+drop table if exists CandidateCoherentSegments;
+
+-- create table CandidateCoherentSegments
+-- (
+--   id                  int unsigned auto_increment not null primary key,
+--   ts                  timestamp not null,
+
+--   signalTableId int,
+
+--   rfFreq              double,
+--   drift               double,
+--   width               double,
+--   power               double,
+--   pfa	              double,
+--   snr                 double
+
+-- );
+
+-- -----------------------------------------------------------------------
+-- CandidatePulseTrains  --
+-- -----------------------------------------------------------------------
+drop table if exists CandidatePulseTrains;
+
+create table CandidatePulseTrains
+(
+  id                  int unsigned auto_increment not null primary key,
+  ts                  timestamp not null,
+
+  signalTableId	      int,
+
+  rfFreq              double,
+  power               double,
+  spectrumNumber      int,
+  binNumber           int,
+  pol                 text not null
+  
+);
+
+drop table if exists PulseTrains;
+create table PulseTrains like CandidatePulseTrains;
+
+-- -----------------------------------------------------------------------
+-- CwBadBands 
+-- -----------------------------------------------------------------------
+
+drop table if exists CwBadBands;
+
+create table CwBadBands
+(
+  id                  	int unsigned auto_increment not null primary key,
+  ts                    timestamp not null,
+  actId			int,
+  dxNumber		int,
+
+  -- FrequencyBand --
+  centerFreq		double, -- MHz 
+  bandwidth		double, -- MHz 
+
+  pol               	text not null,
+  paths			int,
+  maxPathCount		int,
+
+  -- SignalPath: maxPath --
+  rfFreq            	double, -- MHz
+  drift             	double, -- Hz/s
+  width             	double, -- Hz
+  power             	double
+  
+);
+
+-- -----------------------------------------------------------------------
+-- PulseBadBands
+-- -----------------------------------------------------------------------
+drop table if exists PulseBadBands;
+
+create table PulseBadBands
+(
+  id                  	int unsigned auto_increment not null primary key,
+  ts                    timestamp not null,
+  actId			int,
+  dxNumber		int,
+
+  -- FrequencyBand --
+  centerFreq		double, -- MHz 
+  bandwidth		double, -- MHz 
+
+  res			text not null, -- resolution
+  pol               	text not null,
+  pulses		int, -- total pulses in band
+  maxPulseCount		int, -- max number of pulses allowed
+  triplets		int, -- total triplets in band
+  maxTripletCount	int, 
+  tooManyTriplets	enum("No", "Yes")  not null default "No"
+
+);
+
+-- -----------------------------------------------------------------------
+-- Baseline Statistics
+-- -----------------------------------------------------------------------
+
+drop table if exists BaselineStats;
+
+create table BaselineStats
+(
+  id                  	int unsigned auto_increment not null primary key,
+  ts                    timestamp not null,
+  actId			int,
+  dxNumber		int,
+
+  mean			double,
+  stdDev		double,
+  blineRange		double,
+  halfFrameNumber	int,
+  rfCenterFreqMhz	double,
+  bandwidthMhz		double,
+  pol               	text not null,  -- polarization
+  status		text not null
+
+);
+

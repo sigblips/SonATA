@@ -1,0 +1,5 @@
+Makefile
+Makefile.in
+testsigtclsh
+TestSig_wrap.cpp
+TestSig_wrap.doc
