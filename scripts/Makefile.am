@@ -134,5 +134,11 @@ scripts_SCRIPTS = \
 	tscope-setup-beam2-4l.tcl \
 	vger-demo-dualpol.tcl \
 	vger-demo.tcl \
-	vger-demo-xpol.tcl
+	vger-demo-xpol.tcl \
+	sonata-wrapup.tcl \
+	sonata-cron-switch-to-kepler-targets.sh* \
+	sonata-switch-to-kepler-targets.tcl \
+	sonata-cron-begin-gal-survey-session.sh* \
+	sonata-start-gal-survey-obs.tcl
+
 
