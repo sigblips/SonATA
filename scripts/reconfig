@@ -70,7 +70,7 @@ echo "libtoolize..."
 libtoolize --force --automake 
 
 echo "aclocal..."
-aclocal -I m4 
+aclocal
 
 echo "autoheader..."
 autoheader 
