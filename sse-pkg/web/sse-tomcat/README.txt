@@ -56,6 +56,17 @@ setenv DISPLAY localhost:1.0
    /usr/bin/Xvfb :1 -screen 0 1024x768x16 &
 6) In /etc/init.d/rc3.d "ln -s ../xvfb S99xvfb"
 
+Edit conf/tomcat-users.xml to look like this:
+
+<?xml version='1.0' encoding='utf-8'?>
+<tomcat-users>
+  <role rolename="observer"/>
+  <user username="user1" password="pass1" roles="observer"/>
+</tomcat-users>
+
+This defines the user name and password for web page login. Specify your
+desired username and password in place of user1 and pass1.
+
 To build:
 
 CREATE servlets-ssi.jar
@@ -65,7 +76,7 @@ file to servlets-ssi.jar.
 
 BUILD AND INSTALL
 cd webapps/sonata/WEB-INF/src
-make install
+make
 
 TO START
 $CATALINA_HOME/bin/startup.sh
