@@ -6,7 +6,7 @@ Values returned in arguments:
    dbName: database name
 
 Config file location & name:
-   ${HOME}/sse_archive/templogs/system-config.txt
+   ${HOME}/sonata_archive/templogs/system-config.txt
 
 Config file format:
 -----------------------
@@ -39,7 +39,7 @@ variable-class="java.lang.Object" scope="AT_END"%>
 <%
    // define path to config file
    String filePath = System.getProperty("user.home");
-   filePath += "/sse_archive/templogs/system-config.txt";
+   filePath += "/sonata_archive/templogs/system-config.txt";
 
    PageContext pageContext = (PageContext)jspContext;
    pageContext.setAttribute("configFilename", filePath);

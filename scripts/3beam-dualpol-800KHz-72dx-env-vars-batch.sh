@@ -5,7 +5,7 @@
 #---------------------------------
 
 FILTER_DIR="${HOME}/sonata_install/filters"
-setenv SSE_SETUP "${HOME}/sonata_install/setup"
+SSE_SETUP="${HOME}/sonata_install/setup"
 export SSE_SETUP
 export FILTER_DIR
 # Channelizer Environmental Variables

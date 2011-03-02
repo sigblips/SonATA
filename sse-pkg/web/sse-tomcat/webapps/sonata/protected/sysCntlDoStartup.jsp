@@ -49,7 +49,7 @@ Runsse started<br>
 captured --%>
 
 <jsp:include page="/servlet/CmdExecServlet">
-  <jsp:param name="command" value="sonata-startup-cron-wrapper -batch ${param.options}; sleep 1" /> 
+  <jsp:param name="command" value="sonata-startup-cron-wrapper.sh -batch ${param.options}; sleep 1" /> 
 </jsp:include>
 
 </body>

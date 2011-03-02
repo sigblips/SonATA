@@ -47,8 +47,8 @@ public class SystemStatus extends HttpServlet {
       response.setContentType("text/html");
       PrintWriter out = response.getWriter();
 
-      new CmdExec(out, "send-seeker-command-via-telnet act stat");
-      new CmdExec(out, "send-seeker-command-via-telnet status");
+      new CmdExec(out, "send-seeker-command-via-telnet.expect act stat");
+      new CmdExec(out, "send-seeker-command-via-telnet.expect status");
 
    }
 }

@@ -47,7 +47,7 @@ import java.util.regex.*;
 
  Current path is stored as 'path' parameter, with
  slashes URL encoded as hex characters.
- Path is relative to <userHome>/sse_archive.
+ Path is relative to <userHome>/sonata_archive.
  'Leaf' files can be filtered by their filename 
  using UNIX-style globbing (eg, '*.baseline').
  File filter is entered on an HTML form,
@@ -57,7 +57,7 @@ import java.util.regex.*;
  Input Parameters: 
 
  path:
-   - subdirectory relative to /home/<user>/sse_archive
+   - subdirectory relative to /home/<user>/sonata_archive
  fileFilterGlobex:
    - globbing wildcards used to filter files by name 
 
@@ -393,9 +393,9 @@ public class ExamineArchive extends HttpServlet {
       // debug
       //out.println("decodedPathFromParam: '" + decodedPathFromParam + "'<br>");
 
-      // Assume the desired sse_archive directory is stored in the home
+      // Assume the desired sonata_archive directory is stored in the home
       // directory of the username the web server is running under.
-      String archiveTop = System.getProperty("user.home") +"/sse_archive";
+      String archiveTop = System.getProperty("user.home") +"/sonata_archive";
 
       //Store current path in URL with given param name.
       //Subdirs in the path are separated by the subdirSeparator.

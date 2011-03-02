@@ -54,7 +54,7 @@ Echo command results, and show system and error log tails.
 <c:if test="${not empty param.commandText}"> 
    <c:import url="/servlet/CmdExecServlet" var="cmdResponse" scope="page">
       <c:param name="command" 
-         value="send-seeker-command-via-telnet ${param.commandText}" />
+         value="send-seeker-command-via-telnet.expect ${param.commandText}" />
       <c:param name="noEcho" value="true"/>
    </c:import>
 
@@ -88,7 +88,7 @@ cmd:
 
 <%-- show the tail ends of the system and error logs --%>
 <hr>
-<c:set var="logBase" value="\${HOME}/sse_archive/permlogs"/>
+<c:set var="logBase" value="\${HOME}/sonata_archive/permlogs"/>
 
 <b>System Log:</b><br>
 <c:import url="/servlet/CmdExecServlet">

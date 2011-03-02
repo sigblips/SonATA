@@ -42,7 +42,7 @@ Runsse shutting down.<br>
 Allow approx. 15 seconds for shutdown to complete...<br><br>
 
 <jsp:include page="/servlet/CmdExecServlet">
-   <jsp:param name="command" value="sonata-shutdown-cron-wrapper &" />
+   <jsp:param name="command" value="sonata-shutdown-cron-wrapper.sh &" />
 </jsp:include>
 
 </body>

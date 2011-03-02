@@ -38,14 +38,14 @@ public class HelloUniverseExample extends HttpServlet {
 	 out.println("cmd is: " + cmdText);
 	 out.println("<br>");
 
-	 new CmdExec(out, "send-seeker-command-via-telnet " + cmdText);
+	 new CmdExec(out, "send-seeker-command-via-telnet.expect " + cmdText);
       }
 
-      new CmdExec(out, "send-seeker-command-via-telnet act stat");
+      new CmdExec(out, "send-seeker-command-via-telnet.expect act stat");
       
-      new CmdExec(out, "tail -10 ${HOME}/sse_archive/permlogs/systemlogs/systemlog-`date -u +%Y-%m-%d`.txt");
+      new CmdExec(out, "tail -10 ${HOME}/sonata_archive/permlogs/systemlogs/systemlog-`date -u +%Y-%m-%d`.txt");
       
-      new CmdExec(out, "tail -10 ${HOME}/sse_archive/permlogs/errorlogs/errorlog-`date -u +%Y-%m-%d`.txt");
+      new CmdExec(out, "tail -10 ${HOME}/sonata_archive/permlogs/errorlogs/errorlog-`date -u +%Y-%m-%d`.txt");
 
       new CmdExec(out, "whoami");
       new CmdExec(out, "ps -ef | grep jakarta| grep -v grep");
@@ -54,7 +54,7 @@ public class HelloUniverseExample extends HttpServlet {
       new CmdExec(out, "cd /etc/cron.d; ls -l");
       new CmdExec(out, "tail -20 /bad/filename");
 
-      new CmdExec(out, "send-seeker-command-via-telnet status");
+      new CmdExec(out, "send-seeker-command-via-telnet.expect status");
 
       out.println("</body>");
       out.println("</html>");
