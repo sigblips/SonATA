@@ -48,7 +48,7 @@ using namespace sonata_lib;
 
 namespace dx {
 
-const char *const CODE_VERSION = "gen-1.0.172";
+const char *const CODE_VERSION = "kes-1.0.0";
 
 // defines controlling system configuration
 #define ASSIGN_CPUS			(true)
@@ -98,7 +98,7 @@ const int32_t DEFAULT_RCV_BUFSIZE = 4 * 1024 * 1024;
 const int32_t POLARIZATIONS = 2;
 const int32_t RESOLUTIONS = 11;
 const int32_t HALF_FRAMES_PER_FRAME = 2;
-const int32_t MAX_PACKET_ERROR = 500;
+const int32_t MAX_PACKET_ERROR = 1000;
 const int32_t MAX_ACTIVITIES = 2;
 const int32_t MAX_STR_LEN = 50;
 const int32_t MAX_SUBCHANNELS = 8192;
