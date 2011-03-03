@@ -47,4 +47,4 @@ msg=$3
 #echo "addr is '$addr'";
 #echo "msg is '$msg'";
 
-echo "$msg" | mailx -s "$subj" "$addr"
+echo "$msg" | mailx -s "$subj" -r observing@seti.org "$addr"
