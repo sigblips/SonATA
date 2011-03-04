@@ -42,5 +42,5 @@
 
 set bandcovered {0.0 45}
 set masks {
-	0.0 .8192
+	0.0 .4096
 }
