@@ -33,6 +33,7 @@ scripts_SCRIPTS = \
 	3beam-dualpol-800KHz-72dx-env-vars-batch.sh \
 	3beam-dualpol-800KHz-72dx-env-vars.tcsh \
 	3beam-xpol-800KHz-72dx-env-vars.tcsh \
+	data-collect-2beam-env-vars.tcsh \
 	bandwidth-test.tcsh \
 	getdelaytargets.tcsh \
 	getphasetargets.tcsh \
@@ -122,6 +123,7 @@ scripts_SCRIPTS = \
 	sserc-auto.tcl \
 	sserc.tcl \
 	switchConfigFile-1beam-800KHz-1dx.tcsh \
+	switchConfigFile-2beam-data-collect-2dx.tcsh \
 	switchConfigFile-1beam-800KHz-24dxs.tcsh \
 	switchConfigFile-3beam-800KHz-72dxs.tcsh \
 	switchConfigFile-beam2-800KHz-24dxs.tcsh \

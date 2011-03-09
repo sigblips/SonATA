@@ -21,7 +21,7 @@ act set diskfullerror 99.000000000 current
 act set diskfullwarn 95.000000000 current 
 act set dut -0.359341000 current 
 act set earthephem {earth.xyz} current 
-act set emailactstat {on} current 
+act set emailactstat {off} current 
 act set emailaddr {observing@seti.org} current 
 act set freqinvert {never} current 
 act set multitargetnulls {on} current 
