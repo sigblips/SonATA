@@ -142,9 +142,10 @@ scripts_SCRIPTS = \
 	sonata-switch-to-kepler-targets.tcl \
 	sonata-cron-begin-gal-survey-session.sh* \
 	sonata-start-gal-survey-obs.tcl \
-	runpacketrelay-beam1.tsch* \
+	runpacketrelay-beam1.tcsh* \
 	runpacketrelay-beam2.tcsh* \
 	tscope-setup-2beam-4l-data-collect.tcl \
+	tscope-setup-2beam-data-collect.tcl \
 	data-collect-kepler-2beam-800KHz.tcl \
 	data-collect-2beam-env-vars.tcsh 
 
