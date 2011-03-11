@@ -22,7 +22,7 @@ act set diskfullwarn 95.000000000 current
 act set dut -0.359341000 current 
 act set earthephem {earth.xyz} current 
 act set emailactstat {off} current 
-act set emailaddr {jjordan@seti.org} current 
+act set emailaddr {observing@seti.org} current 
 act set freqinvert {never} current 
 act set multitargetnulls {on} current 
 act set nulldepth 7.000000000 current 
@@ -138,7 +138,7 @@ sched set comcallength 2.000000000 current
 sched set comcal {on} current 
 sched set declowerlimit -90.000000000 current 
 sched set decupperlimit 90.000000000 current 
-sched set emailaddr {jrichards@seti.org,pbackus@seti.org,jane@seti.org} current 
+sched set emailaddr {observing@seti.org} current 
 sched set emailstratfail {on} current 
 sched set endfreq 1730.000000000 current 
 sched set followupmode {auto} current 

@@ -33,6 +33,7 @@ scripts_SCRIPTS = \
 	3beam-dualpol-800KHz-72dx-env-vars-batch.sh \
 	3beam-dualpol-800KHz-72dx-env-vars.tcsh \
 	3beam-xpol-800KHz-72dx-env-vars.tcsh \
+	data-collect-2beam-env-vars.tcsh \
 	bandwidth-test.tcsh \
 	getdelaytargets.tcsh \
 	getphasetargets.tcsh \
@@ -122,6 +123,7 @@ scripts_SCRIPTS = \
 	sserc-auto.tcl \
 	sserc.tcl \
 	switchConfigFile-1beam-800KHz-1dx.tcsh \
+	switchConfigFile-2beam-data-collect-2dx.tcsh \
 	switchConfigFile-1beam-800KHz-24dxs.tcsh \
 	switchConfigFile-3beam-800KHz-72dxs.tcsh \
 	switchConfigFile-beam2-800KHz-24dxs.tcsh \
@@ -139,6 +141,13 @@ scripts_SCRIPTS = \
 	sonata-cron-switch-to-kepler-targets.sh* \
 	sonata-switch-to-kepler-targets.tcl \
 	sonata-cron-begin-gal-survey-session.sh* \
-	sonata-start-gal-survey-obs.tcl
+	sonata-start-gal-survey-obs.tcl \
+	runpacketrelay-beam1.tcsh* \
+	runpacketrelay-beam2.tcsh* \
+	tscope-setup-2beam-4l-data-collect.tcl \
+	tscope-setup-2beam-data-collect.tcl \
+	data-collect-kepler-2beam-800KHz.tcl \
+	data-collect-2beam-env-vars.tcsh 
+
 
 

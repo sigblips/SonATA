@@ -288,7 +288,7 @@ void SseUtil::mailMsg(const string &subject, const string &toList,
     string cleanBody(body);
     replace(cleanBody.begin(), cleanBody.end(), oldChar, newChar);
 
-    cmd << "ssemailmsg " 
+    cmd << "ssemailmsg.sh" 
 	<< " '" << cleanSubject << "'"
 	<< " '" << toList << "'"
 	<< " '" << cleanBody  << "'" << endl;
