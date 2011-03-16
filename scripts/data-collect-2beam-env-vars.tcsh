@@ -21,15 +21,15 @@ setenv CHANHOST3X "seti002-1"
 setenv CHANHOST3X_NAME "chan3x"
 
 # Command line options for all Channelizers
-setenv CHANOPTS "-C 16 -c 12 -N 10 -O 0.25 -B 104.8576 -d $FILTER_DIR/LS256c10f25o70d.flt  -w 5 -F 1420.0 -t -1"
+setenv CHANOPTS "-C 16 -c 2 -N 10 -O 0.25 -B 104.8576 -d $FILTER_DIR/LS256c10f25o70d.flt  -w 5 -F 1420.0 -t -1"
 
 # Beam Specific Command Line options for Channelizers
-setenv CHANHOST1X_OPTS "-P X  -i 50100 -j 51100 -I 226.1.50.1 -J 229.1.1.1"
-setenv CHANHOST1Y_OPTS "-P Y  -i 50101 -j 51100 -I 226.1.50.2 -J 229.1.1.1"
-setenv CHANHOST2X_OPTS "-P X  -i 50100 -j 52100 -I 226.1.50.1 -J 229.2.1.1"
-setenv CHANHOST2Y_OPTS "-P Y  -i 50103 -j 52100 -I 226.1.50.2 -J 229.2.1.1"
-setenv CHANHOST3X_OPTS "-P X  -i 50100 -j 53100 -I 226.1.50.1 -J 229.3.1.1"
-setenv CHANHOST3Y_OPTS "-P Y  -i 50105 -j 53100 -I 226.1.50.2 -J 229.3.1.1"
+setenv CHANHOST1X_OPTS "-P X  -i 50000 -j 51100 -I 226.1.50.1 -J 229.1.1.1"
+setenv CHANHOST1Y_OPTS "-P Y  -i 50001 -j 51100 -I 226.1.50.2 -J 229.1.1.1"
+setenv CHANHOST2X_OPTS "-P X  -i 50002 -j 52100 -I 226.2.50.1 -J 229.2.1.1"
+setenv CHANHOST2Y_OPTS "-P Y  -i 50003 -j 52100 -I 226.2.50.2 -J 229.2.1.1"
+setenv CHANHOST3X_OPTS "-P X  -i 50004 -j 53100 -I 226.3.50.1 -J 229.3.1.1"
+setenv CHANHOST3Y_OPTS "-P Y  -i 50005 -j 53100 -I 226.3.50.2 -J 229.3.1.1"
 
 #---------------------------
 # DX Environmental Variables
@@ -50,7 +50,7 @@ setenv DXHOST2_DX_NAMES	"dx2000"
 setenv DXHOST3_DX_NAMES	"dx3000"
 
 # Command line arguments for all DXs
-setenv DX_OPTS "-f 10 -z $FILTER_DIR/LS256c10f25o70d.flt"
+setenv DX_OPTS "-f 10 -z $FILTER_DIR/LS256c10f25o70d.flt -F 256 -w .8192 -T 2048"
 
 # Beam Specific Command line options for DXs
 setenv BEAM1_DX_OPTS "-j 51000 -J 227.1.1.1"

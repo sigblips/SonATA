@@ -4,5 +4,5 @@ foreach h ( seti000-2: seti000-3: seti000-4: seti001-1: seti001-2: seti001-3: se
 
 cd
 echo "copying sonata_install to $h"
-scp -r sonata_install $1@$h
+scp -r sonata_install $1@$h:/home/$1/
 end
