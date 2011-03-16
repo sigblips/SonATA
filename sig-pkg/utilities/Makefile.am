@@ -37,6 +37,7 @@ SUBDIRS = \
 	packetrelay \
 	packetsend \
     packetread \
+	packetchan2beam \
     packetsqimport
 
 localinstall:

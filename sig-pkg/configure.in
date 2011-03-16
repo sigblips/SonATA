@@ -130,4 +130,6 @@ AC_OUTPUT(Makefile
 	utilities/packetread/include/Makefile
 	utilities/packetread/src/Makefile
 	utilities/packetread/Makefile
+	utilities/packetchan2beam/src/Makefile
+	utilities/packetchan2beam/Makefile
 	)

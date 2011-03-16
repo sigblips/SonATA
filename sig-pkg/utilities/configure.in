@@ -95,6 +95,8 @@ AC_OUTPUT(Makefile
 	packetsend/include/Makefile
 	packetsend/src/Makefile
 	packetread/Makefile
+	packetchan2beam/Makefile
+	packetchan2beam/src/Makefile
 	packetsqimport/Makefile
 	packetsqimport/src/Makefile
 	)

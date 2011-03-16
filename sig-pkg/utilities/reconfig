@@ -58,5 +58,8 @@ cd packetsend; ./reconfig; cd ..
 echo "------- reconfiguring packetread -------"
 cd packetread; ./reconfig; cd ..
 
+echo "------- reconfiguring packetchan2beam -------"
+cd packetchan2beam; ./reconfig; cd ..
+
 echo "------- reconfiguring packetsqimport -------"
 cd packetsqimport; ./reconfig; cd ..
