@@ -4,8 +4,7 @@
 #
 # File:    $FILE
 # Project: OpenSonATA
-# Authors: The OpenSonATA code is the result of many programmers
-#          over many years
+# Authors: SigBlips, Jon Richards
 #
 # Copyright 2011 The SETI Institute
 #
@@ -30,161 +29,22 @@
 #
 ################################################################################
 
-# This script attempts to automatically download and install all the necessary 
-# software libraries needed for building and executing the SonATA software.
-# The software installs into the ./$BUILD_DIR directory, so after this is complete
-# you have to add to your path, see the echoed statements at the end.
-# 
-# This script is 95% complete. What is missing is testing to see if it works
-# properly. I ran out of time and was not able to test this thoroughly. If we
-# can get this working it will make the installation on a fresh system much 
-# easier. - Jon Richards - Feb 03/2011
+####################################################################################
+# This script creates a tar file containing all the necessary packages
+# necessary for SonATA building and operation. Normally you will not have to do
+# this, it is a task the open source package developer would do.
+# This creates the tar file that the script get_packages will try
+# to download and install in ../packages.
 ####################################################################################
 
 BUILD_DIR=`pwd`/build
 mkdir $BUILD_DIR
 mkdir $BUILD_DIR/downloads
-mkdir $BUILD_DIR/installs
+PACKAGES_VERSION=packages_1.0
+mkdir $BUILD_DIR/$PACKAGES_VERSION
+mkdir $BUILD_DIR/$PACKAGES_VERSION/bin
 mkdir $BUILD_DIR/build
-
-####################################
-#Download and install GMP 4.3.2
-####################################
-cd $BUILD_DIR/downloads
-wget ftp://ftp.gnu.org/gnu/gmp/gmp-4.3.2.tar.gz
-gzip -d gmp-4.3.2.tar.gz
-tar -xvf gmp-4.3.2.tar       
-cd gmp-4.3.2/
-./configure --prefix=$BUILD_DIR/installs
-make
-make install
-rm -rf $BUILD_DIR/build/*
-rm -rf $BUILD_DIR/downloads/gmp*
-
-####################################
-#Download and install MPFR-2.4.2.tar.gz
-####################################
-cd $BUILD_DIR/downloads
-wget www.mpfr.org/mpfr-current/mpfr-2.4.2.tar.gz
-gzip -d mpfr-2.4.2.tar.gz
-tar -xvf mpfr-2.4.2.tar
-cd mpfr-2.4.2
-./configure --prefix=$BUILD_DIR/installs
-make
-make install
-rm -rf $BUILD_DIR/build/*
-rm -rf $BUILD_DIR/downloads/mpfr*
-
-export LD_LIBRARY_PATH=$BUILD_DIR/install/lib:$LD_LIBRARY_PATH
-export PATH=$BUILD_DIR/install/bin:$PATH
-
-####################################
-##Download TCL8.5.7
-#####################################
-cd  $BUILD_DIR/downloads
-wget http://prdownloads.sourceforge.net/tcl/tcl8.5.7-src.tar.gz
-gunzip tcl8.5.7-src.tar.gz
-tar -xvf tcl8.5.7-src.tar
-cd tcl8.5.7
-cd $BUILD_DIR/build
-$BUILD_DIR/downloads/tcl8.5.7/unix/configure --prefix=$BUILD_DIR/installs --with-local-prefix=$BUILD_DIR/installs
-cp $BUILD_DIR/downloads/tcl8.5.7/generic/tclInt.h $BUILD_DIR/installs/include/
-make 
-make install
-
-####################################
-##Download Tk8.4.18
-#####################################
-cd  $BUILD_DIR/downloads
-wget http://prdownloads.sourceforge.net/tcl/tk8.5.8-src.tar.gz
-gunzip tk8.5.8-src.tar.gz
-tar -xvf tk8.5.8-src.tar
-cd tk8.5.8
-cd $BUILD_DIR/build
-$BUILD_DIR/downloads/tk8.5.8/unix/configure --prefix=$BUILD_DIR/installs --with-local-prefix=$BUILD_DIR/installs --with-tcl=/home/opensonata/$BUILD_DIR/installs/lib
-make 
-make install
-
-####################################
-#Download SWIG 1.3.31
-#####################################
-cd  $BUILD_DIR/downloads
-wget http://prdownloads.sourceforge.net/swig/swig-1.3.31.tar.gz
-gunzip swig-1.3.31.tar.gz
-tar -xvf swig-1.3.31.tar
-cd swig-1.3.31
-cd $BUILD_DIR/build
-$BUILD_DIR/downloads/swig-1.3.31/configure --prefix=$BUILD_DIR/installs --with-local-prefix=$BUILD_DIR/installs
-make 
-make install
-rm -rf $BUILD_DIR/build/*
-rm -rf $BUILD_DIR/downloads/swig-1.3.31*
-
-####################################
-#Download Expect 5.4.1.15
-#####################################
-cd  $BUILD_DIR/downloads
-wget http://sourceforge.net/projects/expect/files/Expect/5.44.1.15/expect-5.44.1.15.tar.gz/download
-gunzip expect-5.44.1.15.tar.gz
-tar -xvf expect-5.44.1.15.tar
-cd  expect-5.44.1.15
-cd $BUILD_DIR/build
-$BUILD_DIR/downloads/expect-5.44.1.15/configure --prefix=$BUILD_DIR/installs --with-local-prefix=$BUILD_DIR/installs --with-tclconfig=$BUILD_DIR/installs/lib --with-tkconfig=$BUILD_DIR/installs/lib -with-tclinclude=$BUILD_DIR/installs/include
-make
-make install
-rm -rf $BUILD_DIR/build/*
-rm -rf $BUILD_DIR/downloads/expect-5.44.1.15*
-rm -rf $BUILD_DIR/build/*
-rm -rf $BUILD_DIR/downloads/tk8*
-rm -rf $BUILD_DIR/build/*
-rm -rf $BUILD_DIR/downloads/tcl8*
-
-
-####################################
-##Download and install gnu readline
-#####################################
-cd  $BUILD_DIR/downloads
-wget http://ftp.gnu.org/gnu/readline/readline-5.2.tar.gz
-gunzip readline-5.2.tar.gz
-tar -xvf readline-5.2.tar
-cd  readline-5.2
-cd $BUILD_DIR/build
-$BUILD_DIR/downloads/readline-5.2/configure --prefix=$BUILD_DIR/installs --with-local-prefix=$BUILD_DIR/installs
-make
-make install
-rm -rf $BUILD_DIR/build/*
-rm -rf $BUILD_DIR/downloads/readline-5.2*
-
-####################################
-##Download and install  fftw
-#####################################
-cd  $BUILD_DIR/downloads
-wget http://www.fftw.org/fftw-3.2.1.tar.gz
-gunzip fftw-3.2.1.tar.gz
-tar -xvf fftw-3.2.1.tar
-cd  fftw-3.2.1
-cd $BUILD_DIR/build
-$BUILD_DIR/downloads/fftw-3.2.1/configure --prefix=$BUILD_DIR/installs --with-local-prefix=$BUILD_DIR/installs --enable-threads --enable-float --enable-sse --disable-fortran
-make
-make check
-make install
-rm -rf $BUILD_DIR/build/*
-rm -rf $BUILD_DIR/downloads/fftw-3.2.1*
-
-#####################################
-## Build and install ncurses
-#####################################
-cd  $BUILD_DIR/downloads
-wget ftp://ftp.gnu.org/gnu/ncurses/ncurses-5.7.tar.gz
-gunzip ncurses-5.7.tar.gz
-tar -xvf ncurses-5.7.tar
-cd ncurses-5.7
-./configure --prefix=$BUILD_DIR/installs --with-local-prefix=$BUILD_DIR/installs
-make
-make install
-rm -rf $BUILD_DIR/build/*
-rm -rf $BUILD_DIR/downloads/nc*
-
+PACKAGES_FILE=$PACKAGES_VERSION.tar.gz
 
 ####################################
 ##Download and install  ACE_wrappers
@@ -202,15 +62,16 @@ ln -s platform_linux.GNU platform_macros.GNU
 
 cd $ACE_ROOT/ace
 make
-rm -rf $BUILD_DIR/installs/ACE_wrappers
-mkdir $BUILD_DIR/installs/ACE_wrappers
-cp -r $ACE_ROOT/* $BUILD_DIR/installs/ACE_wrappers
+rm -rf $BUILD_DIR/$PACKAGES_VERSION/ACE_wrappers
+mkdir $BUILD_DIR/$PACKAGES_VERSION/ACE_wrappers
+cp -r $ACE_ROOT/* $BUILD_DIR/$PACKAGES_VERSION/ACE_wrappers
 rm -rf $BUILD_DIR/build/*
 rm -rf $BUILD_DIR/downloads/A*
 
 ####################################
 ##Download and install xtail 
 #####################################
+echo $BUILD_DIR
 cd  $BUILD_DIR/downloads
 wget http://www.unicom.com/files/xtail-2.1.tar.gz
 gzip -d xtail-2.1.tar.gz
@@ -218,82 +79,17 @@ tar -xvf xtail-2.1.tar
 cd $BUILD_DIR/downloads/xtail-2.1
 sh ./configure 
 make
-cp xtail ../../installs/bin
-rm -rf $BUILD_DIR/downloads/x*
+cp xtail ../../$PACKAGES_VERSION/bin/xtail
 
-####################################
-## Build CppUnit
-#####################################
-cd  $BUILD_DIR/opensonata/OpenSonATA
-cd CppUnit
-./reconfig --prefix=$BUILD_DIR/installs --with-local-prefix=$BUILD_DIR/installs
-make check
-make install
+rm -rf $BUILD_DIR/build
+rm -rf $BUILD_DIR/downloads
+cd $BUILD_DIR
+tar -cvzf $PACKAGES_FILE $PACKAGES_VERSION
+cp $PACKAGES_FILE $BUILD_DIR/..
+cd $BUILD_DIR/..
 
-#####################################
-## Build tclreadline
-#####################################
-cd  $BUILD_DIR/opensonata/OpenSonATA/tclreadline
-./reconfig --with-tcl=/usr/lib64 --with-tlib-library="-lncurses" --prefix=$BUILD_DIR/installs --with-local-prefix=$BUILD_DIR/installs --with-tcl=$BUILD_DIR/installs/lib --with-readline-includes=$BUILD_DIR/installs/include/readline
-make install
+rm -rf $BUILD_DIR
 
-#####################################
-## Build sse-pkg
-#####################################
-cd  $BUILD_DIR/opensonata/OpenSonATA/sse-pkg
-
-sed "s/ACE_ROOT=/XACE_ROOT=/g" $BUILD_DIR/opensonata/OpenSonATA/sse-pkg/configure.in > $BUILD_DIR/opensonata/OpenSonATA/sse-pkg/configure.in.tmp
-mv configure.in.tmp configure.in 
-chmod 755 ./configure.in
-./reconfig
-make
-make install
-
-#####################################
-## Build sigproc-pkg
-#####################################
-cd  $BUILD_DIR/opensonata/OpenSonATA/sigproc-pkg
-ln -s  $BUILD_DIR/opensonata/OpenSonATA/sigproc-pkg/libtool 
-./reconfig --prefix=$BUILD_DIR/installs --with-local-prefix=$BUILD_DIR/installs
-cd utilities
-./reconfig --prefix=$BUILD_DIR/installs --with-local-prefix=$BUILD_DIR/installs
-cd ../ATApackets
-./reconfig --prefix=$BUILD_DIR/installs --with-local-prefix=$BUILD_DIR/installs
-cd ..
-make leastsquares
-make
-make install
-
-sed "10ilappend ::auto_path $BUILD_DIR/installs/lib" $BUILD_DIR/opensonata/OpenSonATA/sse-pkg/util/example.sserc > ~/.sserc
-
-clear
-
-echo "###########################################################"
-echo  Finished. Please put these changes into your .bashrc file.
-echo "###########################################################"
-echo 
-echo export PATH=$JAVA_HOME/bin:$BUILD_DIR/installs/bin:$PATH
-echo export ACE_ROOT=$BUILD_DIR/installs/ACE_wrappers
-echo export LD_LIBRARY_PATH=$ACE_ROOT/ace:$ACE_ROOT/lib:$BUILD_DIR/installs/lib:$JAVA_HOME/jre/lib:$LD_LIBRARY_PATH
 echo
-echo And you need to add this to your shell rc file:
-echo "limit stacksize unlimited"
+echo The file $PACKAGES_FILE should have been created in this directory.
 echo
-
-
-
-echo ##############################################################
-echo # You may wish to install mysql. Use
-echo # zypper install mysql mysql-tools mysql-devel
-echo #
-echo # To start mysql become root then "/etc/init.d/mysql start"
-echo #
-echo ##############################################################
-echo #
-echo # To download java version http://java.sun.com/products/archive/
-echo # and downlaod JDK/JRE 5.0,  jdk-1_5_0_22-linux-amd64.bin
-echo # Execute  jdk-1_5_0_22-linux-amd64.bin which will create 
-echo # a directory . Move this directory to
-echo # $BUILD_DIR/installs/jdk
-echo #
-echo ##############################################################
