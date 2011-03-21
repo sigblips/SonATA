@@ -29,12 +29,12 @@
 ################################################################################
 
 #AC_INIT(include/PacketSend.h)
-AC_INIT([packetsqimport], [1.0])
+AC_INIT([packetchan2beam], [1.0])
 AM_CONFIG_HEADER(config.h)
 #AC_PREREQ(2.10)dnl               dnl Minimum Autoconf version required.
 AC_ARG_PROGRAM
 AM_MAINTAINER_MODE
-AC_CONFIG_SRCDIR([src/packetsqimport.cpp])
+AC_CONFIG_SRCDIR([src/packetchan2beam.cpp])
 AM_INIT_AUTOMAKE
 #AM_INIT_AUTOMAKE(packetsend, 0.1)
 

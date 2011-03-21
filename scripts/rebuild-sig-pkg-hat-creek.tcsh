@@ -11,3 +11,7 @@ cd ${HOME}/SonATA/sig-pkg
 ./reconfig
 
 make -j25 install
+
+cd ${HOME}/SonATA/scripts
+
+make install

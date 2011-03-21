@@ -1,0 +1,95 @@
+#!/bin/bash
+
+################################################################################
+#
+# File:    $FILE
+# Project: OpenSonATA
+# Authors: SigBlips, Jon Richards
+#
+# Copyright 2011 The SETI Institute
+#
+# OpenSonATA is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+# 
+# OpenSonATA is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with OpenSonATA.  If not, see<http://www.gnu.org/licenses/>.
+# 
+# Implementers of this code are requested to include the caption
+# "Licensed through SETI" with a link to setiQuest.org.
+# 
+# For alternate licensing arrangements, please contact
+# The SETI Institute at www.seti.org or setiquest.org. 
+#
+################################################################################
+
+####################################################################################
+# This script creates a tar file containing all the necessary packages
+# necessary for SonATA building and operation. Normally you will not have to do
+# this, it is a task the open source package developer would do.
+# This creates the tar file that the script get_packages will try
+# to download and install in ../packages.
+####################################################################################
+
+BUILD_DIR=`pwd`/build
+mkdir $BUILD_DIR
+mkdir $BUILD_DIR/downloads
+PACKAGES_VERSION=packages_1.0
+mkdir $BUILD_DIR/$PACKAGES_VERSION
+mkdir $BUILD_DIR/$PACKAGES_VERSION/bin
+mkdir $BUILD_DIR/build
+PACKAGES_FILE=$PACKAGES_VERSION.tar.gz
+
+####################################
+##Download and install  ACE_wrappers
+#####################################
+cd  $BUILD_DIR/downloads
+wget http://download.dre.vanderbilt.edu/previous_versions/ACE-5.7.8.zip
+unzip ACE-5.7.8.zip
+cd ACE_wrappers
+export ACE_ROOT=$PWD
+cd $ACE_ROOT/ace
+dos2unix ../bin/add_rel_link.sh
+ln -s config-linux.h config.h
+cd $ACE_ROOT/include/makeinclude
+ln -s platform_linux.GNU platform_macros.GNU
+
+cd $ACE_ROOT/ace
+make
+rm -rf $BUILD_DIR/$PACKAGES_VERSION/ACE_wrappers
+mkdir $BUILD_DIR/$PACKAGES_VERSION/ACE_wrappers
+cp -r $ACE_ROOT/* $BUILD_DIR/$PACKAGES_VERSION/ACE_wrappers
+rm -rf $BUILD_DIR/build/*
+rm -rf $BUILD_DIR/downloads/A*
+
+####################################
+##Download and install xtail 
+#####################################
+echo $BUILD_DIR
+cd  $BUILD_DIR/downloads
+wget http://www.unicom.com/files/xtail-2.1.tar.gz
+gzip -d xtail-2.1.tar.gz
+tar -xvf xtail-2.1.tar
+cd $BUILD_DIR/downloads/xtail-2.1
+sh ./configure 
+make
+cp xtail ../../$PACKAGES_VERSION/bin/xtail
+
+rm -rf $BUILD_DIR/build
+rm -rf $BUILD_DIR/downloads
+cd $BUILD_DIR
+tar -cvzf $PACKAGES_FILE $PACKAGES_VERSION
+cp $PACKAGES_FILE $BUILD_DIR/..
+cd $BUILD_DIR/..
+
+rm -rf $BUILD_DIR
+
+echo
+echo The file $PACKAGES_FILE should have been created in this directory.
+echo
